@@ -118,13 +118,16 @@ func main() {
 	// which opens the file in notepad.exe on Windows
 
 	// Set server callback for context updates
-	app.httpServer.SetContextCallback(func(cookies, targetURL, organizationID, userAgent string) {
+	app.httpServer.SetContextCallback(func(cookies, targetURL, organizationID string, headers map[string]string) {
 		logger.Info(">>> Context received from browser extension")
 		logger.Info("    URL: %s", targetURL)
 		logger.Info("    Organization ID: %s", organizationID)
-		logger.Info("    User-Agent: %s", userAgent)
 		logger.Info("    Cookies length: %d characters", len(cookies))
-		app.apiClient.SetContext(cookies, targetURL, organizationID, userAgent)
+		logger.Info("    Headers count: %d", len(headers))
+		if ua, ok := headers["User-Agent"]; ok {
+			logger.Info("    User-Agent: %s", ua)
+		}
+		app.apiClient.SetContext(cookies, targetURL, organizationID, headers)
 		app.trayMgr.UpdateTargetURL(targetURL)
 		// Reset error count when new cookies arrive
 		app.errorCount = 0

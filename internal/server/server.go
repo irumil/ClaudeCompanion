@@ -10,10 +10,10 @@ import (
 
 // ContextData represents the data received from browser extension
 type ContextData struct {
-	Cookies        string `json:"cookies"`
-	TargetURL      string `json:"targetUrl"`
-	OrganizationID string `json:"organizationId"`
-	UserAgent      string `json:"userAgent"`
+	Cookies        string            `json:"cookies"`
+	TargetURL      string            `json:"targetUrl"`
+	OrganizationID string            `json:"organizationId"`
+	Headers        map[string]string `json:"headers"` // Includes User-Agent
 }
 
 // Server handles HTTP requests from browser extension
@@ -21,7 +21,7 @@ type Server struct {
 	port         int
 	mu           sync.RWMutex
 	contextData  *ContextData
-	onContextSet func(cookies, targetURL, organizationID, userAgent string)
+	onContextSet func(cookies, targetURL, organizationID string, headers map[string]string)
 	httpServer   *http.Server
 }
 
@@ -33,7 +33,7 @@ func NewServer(port int) *Server {
 }
 
 // SetContextCallback sets the callback to be called when context is updated
-func (s *Server) SetContextCallback(callback func(cookies, targetURL, organizationID, userAgent string)) {
+func (s *Server) SetContextCallback(callback func(cookies, targetURL, organizationID string, headers map[string]string)) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.onContextSet = callback
@@ -103,12 +103,12 @@ func (s *Server) handleSetContext(w http.ResponseWriter, r *http.Request) {
 	callback := s.onContextSet
 	s.mu.Unlock()
 
-	log.Printf("Context received from extension: URL=%s, OrgID=%s, UserAgent=%s, Cookies length=%d",
-		data.TargetURL, data.OrganizationID, data.UserAgent, len(data.Cookies))
+	log.Printf("Context received from extension: URL=%s, OrgID=%s, Cookies length=%d, Headers count=%d",
+		data.TargetURL, data.OrganizationID, len(data.Cookies), len(data.Headers))
 
 	// Call callback if set
 	if callback != nil {
-		callback(data.Cookies, data.TargetURL, data.OrganizationID, data.UserAgent)
+		callback(data.Cookies, data.TargetURL, data.OrganizationID, data.Headers)
 	}
 
 	w.Header().Set("Content-Type", "application/json")

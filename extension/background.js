@@ -2,6 +2,23 @@
 const DEFAULT_PORT = 8383;
 let currentPort = DEFAULT_PORT;
 
+// Storage for captured anthropic-client-sha from real browser requests
+let capturedClientSha = null;
+
+// Capture anthropic-client-sha from real API requests
+browser.webRequest.onBeforeSendHeaders.addListener(
+  (details) => {
+    // Find anthropic-client-sha header in real browser request
+    const shaHeader = details.requestHeaders.find(h => h.name.toLowerCase() === 'anthropic-client-sha');
+    if (shaHeader && shaHeader.value) {
+      capturedClientSha = shaHeader.value;
+      console.log('[ClaudeCompanion] ✅ Captured anthropic-client-sha:', capturedClientSha);
+    }
+  },
+  {urls: ["*://claude.ai/api/*"]},
+  ["requestHeaders"]
+);
+
 // Load settings on startup
 browser.storage.local.get(['port']).then((result) => {
   if (result.port) {
@@ -70,36 +87,82 @@ async function sendContext() {
     return false;
   }
 
-  // Get ONLY sessionKey cookie - that's all we need!
-  const sessionCookie = await browser.cookies.get({
-    url: "https://claude.ai",
-    name: "sessionKey"
+  // Get ALL cookies for claude.ai to better emulate browser requests
+  const allCookies = await browser.cookies.getAll({
+    url: "https://claude.ai"
   });
 
-  if (!sessionCookie || !sessionCookie.value) {
-    console.error('[ClaudeCompanion] ❌ sessionKey cookie not found');
+  if (!allCookies || allCookies.length === 0) {
+    console.error('[ClaudeCompanion] ❌ No cookies found for claude.ai');
     return false;
   }
 
-  const sessionKey = sessionCookie.value;
-  console.log('[ClaudeCompanion] ✅ Found sessionKey:', sessionKey.substring(0, 20) + '...');
+  // Convert cookies array to cookie string format
+  const cookieString = allCookies.map(c => `${c.name}=${c.value}`).join('; ');
+  console.log('[ClaudeCompanion] ✅ Found cookies:', allCookies.map(c => c.name).join(', '));
 
-  // Get User-Agent from browser
-  const userAgent = navigator.userAgent;
-  console.log('[ClaudeCompanion] ✅ User-Agent:', userAgent);
+  // Extract important values from cookies for anthropic-* headers
+  const findCookie = (name) => allCookies.find(c => c.name === name)?.value || '';
+  const anonymousId = findCookie('ajs_anonymous_id') || findCookie('anthropic-anonymous-id');
+  const deviceId = findCookie('anthropic-device-id');
+
+  console.log('[ClaudeCompanion] ✅ Anonymous ID:', anonymousId);
+  console.log('[ClaudeCompanion] ✅ Device ID:', deviceId);
+
+  // Build headers to match real browser API requests exactly
+  // Based on actual Firefox request to /api/organizations/.../usage
+  const headers = {
+    'User-Agent': navigator.userAgent,  // Real browser User-Agent
+    'Accept': '*/*',
+    'Accept-Language': navigator.language || 'ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
+    // Note: Accept-Encoding excluded - curl doesn't handle gzip automatically
+    // Note: Connection and Host are added by curl automatically
+    'Referer': 'https://claude.ai/settings/usage',
+    'Content-Type': 'application/json',
+
+    // Critical Anthropic headers - these are essential!
+    'anthropic-client-platform': 'web_claude_ai',
+    'anthropic-client-version': '1.0.0',
+
+    // Sec-Fetch headers for CORS requests
+    'Sec-Fetch-Dest': 'empty',
+    'Sec-Fetch-Mode': 'cors',
+    'Sec-Fetch-Site': 'same-origin',
+    'Priority': 'u=4',
+    'TE': 'trailers'
+  };
+
+  // Add dynamic anthropic headers
+  if (anonymousId) {
+    headers['anthropic-anonymous-id'] = anonymousId;
+  }
+  if (deviceId) {
+    headers['anthropic-device-id'] = deviceId;
+  }
+
+  // Add captured client SHA from real browser requests
+  // This is dynamically extracted to always match current Claude.ai version
+  if (capturedClientSha) {
+    headers['anthropic-client-sha'] = capturedClientSha;
+    console.log('[ClaudeCompanion] ✅ Using captured client SHA:', capturedClientSha);
+  } else {
+    console.log('[ClaudeCompanion] ⚠️ No client SHA captured yet (will be captured on next API request)');
+  }
+
+  console.log('[ClaudeCompanion] ✅ Headers prepared:', Object.keys(headers).join(', '));
 
   const payload = {
-    cookies: `sessionKey=${sessionKey}`,  // Send ONLY sessionKey
+    cookies: cookieString,  // Send ALL cookies
     targetUrl: orgData.usageUrl,
-    organizationId: orgData.organizationId,  // Add organization UUID
-    userAgent: userAgent  // Add browser User-Agent
+    organizationId: orgData.organizationId,
+    headers: headers  // All browser headers including User-Agent
   };
 
   console.log('[ClaudeCompanion] Sending context to desktop app:', {
     usageUrl: orgData.usageUrl,
     organizationId: orgData.organizationId,
-    sessionKey: sessionKey.substring(0, 20) + '...',
-    userAgent: userAgent,
+    cookies: allCookies.map(c => c.name).join(', '),
+    headers: Object.keys(headers).join(', '),
     endpoint: endpoint
   });
 

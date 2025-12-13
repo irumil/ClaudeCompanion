@@ -12,7 +12,8 @@
     "tabs",
     "*://claude.ai/*",
     "storage",
-    "notifications"
+    "notifications",
+    "webRequest"
   ],
   "background": {
     "scripts": ["background.js"]

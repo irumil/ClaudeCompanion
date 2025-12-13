@@ -27,7 +27,7 @@ type Client struct {
 	cookies        string
 	targetURL      string
 	organizationID string
-	userAgent      string
+	headers        map[string]string // Includes User-Agent
 	proxy          string
 }
 
@@ -38,14 +38,14 @@ func NewClient(proxy string, useCurlFallback bool) *Client {
 	}
 }
 
-// SetContext updates cookies, target URL, organization ID and user agent
-func (c *Client) SetContext(cookies, targetURL, organizationID, userAgent string) {
+// SetContext updates cookies, target URL, organization ID and headers (includes User-Agent)
+func (c *Client) SetContext(cookies, targetURL, organizationID string, headers map[string]string) {
 	c.cookies = cookies
 	c.targetURL = targetURL
 	c.organizationID = organizationID
-	c.userAgent = userAgent
-	log.Printf("Context updated: URL=%s, OrgID=%s, UserAgent=%s, Cookies length=%d",
-		targetURL, organizationID, userAgent, len(cookies))
+	c.headers = headers
+	log.Printf("Context updated: URL=%s, OrgID=%s, Cookies length=%d, Headers count=%d",
+		targetURL, organizationID, len(cookies), len(headers))
 }
 
 // HasContext returns true if cookies are set
@@ -67,18 +67,20 @@ func (c *Client) GetUsage() (*UsageResponse, error) {
 func (c *Client) fetchWithCurl() (*UsageResponse, error) {
 	curlPath := c.getCurlPath()
 
-	// Use browser User-Agent if available, otherwise use default
-	userAgent := c.userAgent
-	if userAgent == "" {
-		userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-	}
-
 	args := []string{
 		"-X", "GET",
 		c.targetURL,
-		"-H", fmt.Sprintf("User-Agent: %s", userAgent),
-		"-H", "Accept: */*",
-		"-H", fmt.Sprintf("Cookie: %s", c.cookies), // Only sessionKey now
+		"-H", fmt.Sprintf("Cookie: %s", c.cookies), // All cookies from browser
+	}
+
+	// Add all browser headers to emulate real browser request
+	for key, value := range c.headers {
+		// Skip Accept-Encoding because curl doesn't handle gzip automatically
+		if key == "Accept-Encoding" {
+			continue
+		}
+		// Add all headers including User-Agent from browser
+		args = append(args, "-H", fmt.Sprintf("%s: %s", key, value))
 	}
 
 	// Add proxy if configured
@@ -227,20 +229,23 @@ func (c *Client) SendGreeting(chatID, text string) error {
 		return fmt.Errorf("failed to marshal payload: %w", err)
 	}
 
-	// Use browser User-Agent if available, otherwise use default
-	userAgent := c.userAgent
-	if userAgent == "" {
-		userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-	}
-
 	args := []string{
 		"-X", "POST",
 		url,
-		"-H", fmt.Sprintf("User-Agent: %s", userAgent),
-		"-H", "Accept: */*",
 		"-H", "Content-Type: application/json",
-		"-H", fmt.Sprintf("Cookie: %s", c.cookies),
+		"-H", fmt.Sprintf("Cookie: %s", c.cookies), // All cookies from browser
 		"-d", string(payloadBytes),
+	}
+
+	// Add all browser headers to emulate real browser request
+	for key, value := range c.headers {
+		// Skip Content-Type as it's already added above
+		// Skip Accept-Encoding because curl doesn't handle gzip automatically
+		if key == "Content-Type" || key == "Accept-Encoding" {
+			continue
+		}
+		// Add all headers including User-Agent from browser
+		args = append(args, "-H", fmt.Sprintf("%s: %s", key, value))
 	}
 
 	// Add proxy if configured
