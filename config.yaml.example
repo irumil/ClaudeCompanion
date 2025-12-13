@@ -1,0 +1,44 @@
+# ClaudeCompanion Configuration Example
+# Copy this file to config.yaml and adjust settings
+
+server_port: 8383
+poll_interval_seconds: 60     # Recommended: 60-120 seconds to reduce risk of account suspension
+use_curl_fallback: true
+gray_mode_threshold: 5        # N errors before showing gray icon
+notification_threshold: 10    # N errors before showing notification
+proxy: ""                     # Leave empty for no proxy, or set "http://your-proxy:port"
+enable_file_logging: false    # true = log to file and console, false = console only
+browser_path: ""              # Leave empty for default browser, or set path like "C:\\Program Files\\Mozilla Firefox\\firefox.exe"
+
+low_value_notifications:
+  enabled: true
+  threshold: 20               # Show notification when quota <= 20%
+  phrases:
+    - "Пора идти домой! 🏡"
+    - "Система устала. Вы — тоже. 😴"
+    - "Время отдохнуть! ☕"
+    - "API говорит: хватит на сегодня! 🛑"
+    - "Скоро токены закончатся — придётся писать код самому!"
+    - "Токены на исходе — пора идти домой?"
+    - "Осталось мало токенов. Может, сварить кофе?"
+    - "Внимание! Claude.ai уходит в отпуск. Вы — на связи."
+    - "Токены истекают... Не забудьте сохранить черновики!"
+  zero_phrases:
+    - "Всё, капут! 💥"
+    - "0 — это не число, это приговор. 🛌"
+    - "Game over! 🎮"
+    - "Лимит исчерпан! 🚫"
+
+demo_mode:
+  enabled: false              # Enable for testing: simulates declining quota
+  duration_seconds: 60        # Full cycle duration: 100% → 0%
+
+greeting:
+  greeting_cron: "0 8 * * *"  # Cron schedule: 8 AM every day (format: minute hour day month weekday)
+  greeting_text: "Ok"         # Message to send
+  greeting_chat_id: ""        # UUID of chat conversation (required for greeting to work)
+
+work_hours:
+  enabled: false              # Enable to limit polling to work hours only
+  start: "08:00"              # Start time (HH:MM format)
+  end: "20:00"                # End time (HH:MM format)

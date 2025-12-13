@@ -1,0 +1,30 @@
+{
+  "manifest_version": 2,
+  "name": "ClaudeCompanion Context Provider",
+  "version": "1.0.0",
+  "description": "Sends cookies and URL to ClaudeCompanion desktop application",
+  "icons": {
+    "48": "icon48.png",
+    "96": "icon96.png"
+  },
+  "permissions": [
+    "cookies",
+    "tabs",
+    "*://claude.ai/*",
+    "storage",
+    "notifications"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "claudecompanion@example.com",
+      "strict_min_version": "57.0"
+    }
+  }
+}

@@ -1,0 +1,52 @@
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test binary
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
+
+# Build artifacts
+dist/*.exe
+dist/*.log
+dist/*.zip
+dist/*.ico
+dist/claudecompanion-*.log
+
+# Configuration files (contain sensitive data)
+dist/config.yaml
+config.yaml
+
+# IDE specific files
+.idea/
+.vscode/
+.claude/
+*.swp
+*.swo
+*~
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Windows resource files (generated)
+cmd/claudecompanion/rsrc_windows_amd64.syso
+cmd/claudecompanion/winres/
+cmd/claudecompanion/app.rc
