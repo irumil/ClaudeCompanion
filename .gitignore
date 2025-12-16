@@ -17,6 +17,7 @@ vendor/
 go.work
 
 # Build artifacts
+dist
 dist/*.exe
 dist/*.log
 dist/*.zip

@@ -114,6 +114,12 @@ func main() {
 		app.Shutdown()
 	})
 
+	// Set refresh callback for manual statistics update
+	app.trayMgr.SetRefreshCallback(func() {
+		logger.Info("Manual refresh requested by user")
+		app.poll()
+	})
+
 	// Don't set OpenSettings callback - use default implementation from tray.go
 	// which opens the file in notepad.exe on Windows
 

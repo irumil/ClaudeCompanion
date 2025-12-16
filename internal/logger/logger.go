@@ -71,10 +71,18 @@ func SetFileLogging(enabled bool) error {
 		return fmt.Errorf("failed to open log file: %w", err)
 	}
 
-	// Write to both file and console
-	multiWriter := io.MultiWriter(os.Stdout, logFile)
-	logger = log.New(multiWriter, "", log.LstdFlags|log.Lshortfile)
-	log.SetOutput(multiWriter)
+	// Check if stdout is available (not available in GUI mode on Windows)
+	var output io.Writer
+	if isStdoutAvailable() {
+		// Write to both file and console
+		output = io.MultiWriter(os.Stdout, logFile)
+	} else {
+		// GUI mode - write only to file
+		output = logFile
+	}
+
+	logger = log.New(output, "", log.LstdFlags|log.Lshortfile)
+	log.SetOutput(output)
 
 	Info("File logging enabled: %s", logPath)
 	return nil
@@ -161,4 +169,11 @@ func Fatal(format string, v ...interface{}) {
 // GetLogPath returns the current log file path
 func GetLogPath() (string, error) {
 	return getLogPath()
+}
+
+// isStdoutAvailable checks if stdout is available (not in GUI mode)
+func isStdoutAvailable() bool {
+	// Try to get file info for stdout
+	_, err := os.Stdout.Stat()
+	return err == nil
 }

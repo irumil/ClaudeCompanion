@@ -24,6 +24,7 @@ type TrayManager struct {
 	onExit         func()
 	onOpenSettings func()
 	onClick        func()
+	onRefresh      func()
 }
 
 // NewTrayManager creates a new tray manager
@@ -53,6 +54,11 @@ func (t *TrayManager) SetClickCallback(callback func()) {
 	t.onClick = callback
 }
 
+// SetRefreshCallback sets the callback for manual refresh
+func (t *TrayManager) SetRefreshCallback(callback func()) {
+	t.onRefresh = callback
+}
+
 // SetBrowserPath sets the browser path to use for opening URLs
 func (t *TrayManager) SetBrowserPath(path string) {
 	t.browserPath = path
@@ -69,6 +75,7 @@ func (t *TrayManager) Initialize() {
 
 	// Create menu items
 	mOpenClaude := systray.AddMenuItem("Открыть Claude.ai", "Открыть сайт Claude.ai в браузере")
+	mRefresh := systray.AddMenuItem("Получить статистику", "Обновить статистику сейчас")
 	systray.AddSeparator()
 	mOpenSettings := systray.AddMenuItem("Открыть настройки", "Открыть конфигурационный файл")
 	systray.AddSeparator()
@@ -80,6 +87,10 @@ func (t *TrayManager) Initialize() {
 			select {
 			case <-mOpenClaude.ClickedCh:
 				t.openURL("https://claude.ai")
+			case <-mRefresh.ClickedCh:
+				if t.onRefresh != nil {
+					t.onRefresh()
+				}
 			case <-mOpenSettings.ClickedCh:
 				t.handleOpenSettings()
 			case <-mQuit.ClickedCh:
