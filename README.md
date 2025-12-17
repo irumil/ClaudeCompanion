@@ -99,26 +99,16 @@ browser_path: "C:\\Program Files\\Mozilla Firefox\\firefox.exe"  # Optional: cus
 enable_file_logging: false  # true = log to file, false = console only
 ```
 
-### 3. Run
-
-Double-click `claudecompanion.exe` - it will start in system tray (no console window).
-
-### 4. Launch Firefox with Extension (Automatic)
-
-**Recommended method** - Firefox will open with extension pre-installed:
-
-1. Click tray icon → "Открыть Claude.ai"
-2. Firefox will launch with temporary profile and extension automatically loaded
-3. Extension will send cookies to desktop app automatically
-
-**Alternative method** - Manual installation:
+### 3. Install Browser Extension
 
 1. Open Firefox
 2. Go to `about:debugging#/runtime/this-firefox`
 3. Click "Load Temporary Add-on"
 4. Select `extension/manifest.json`
 
-**Note:** The automatic method uses `build/launch-firefox-with-extension.bat` which creates a temporary Firefox profile with the extension pre-installed. This profile is deleted on each run, so you don't need to manually reload the extension.
+### 4. Run
+
+Double-click `claudecompanion.exe` - it will start in system tray (no console window).
 
 ## Usage
 
