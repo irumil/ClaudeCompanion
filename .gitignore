@@ -21,7 +21,7 @@ dist
 dist/*.exe
 dist/*.log
 dist/*.zip
-dist/*.ico
+dist/icon.ico
 dist/claudecompanion-*.log
 
 # Configuration files (contain sensitive data)
