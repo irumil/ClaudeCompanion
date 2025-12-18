@@ -33,5 +33,9 @@
   "developer": {
     "name": "rizmailov",
     "url": "https://github.com/irumil/ClaudeCompanion"
+  },
+  "data_collection_permissions": {
+    "cookies": "Required to read sessionKey from claude.ai for API authentication. Sent only to localhost.",
+    "webRequest": "Required to detect when you visit claude.ai. Does not modify requests."
   }
 }
