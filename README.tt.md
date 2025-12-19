@@ -259,7 +259,7 @@ build-debug.bat
 
 ```bash
 # 1. Репозиторийны клонлау (яки ZIP йөкләү)
-git clone https://github.com/your-username/ClaudeCompanion.git
+git clone https://github.com/irumil/ClaudeCompanion.git
 cd ClaudeCompanion
 
 # 2. Бәйләнешләрне урнаштыру

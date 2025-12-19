@@ -259,7 +259,7 @@ build-debug.bat
 
 ```bash
 # 1. Клонировать репозиторий (или скачать ZIP)
-git clone https://github.com/your-username/ClaudeCompanion.git
+git clone https://github.com/irumil/ClaudeCompanion.git
 cd ClaudeCompanion
 
 # 2. Установить зависимости
