@@ -429,4 +429,4 @@ For issues and questions, please open an issue on GitHub.
 
 ---
 
-🇬🇧 English version | 🇷🇺 [Русская версия](README.ru.md)
+🇬🇧 English version | 🇷🇺 [Русская версия](README.ru.md) | [Татарча](README.tt.md)

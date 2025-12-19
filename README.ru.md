@@ -432,4 +432,4 @@ ClaudeCompanion/
 
 ---
 
-🇬🇧 [English version](README.md) | 🇷🇺 Русская версия
+🇬🇧 [English version](README.md) | 🇷🇺 Русская версия | [Татарча](README.tt.md)
