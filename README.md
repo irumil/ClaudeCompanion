@@ -1,163 +1,432 @@
-# ClaudeCompanion Monitor
+# ClaudeCompanion
 
-**[Татарча / Tatar](README.tt.md)**
+System tray application for monitoring Claude.ai API usage quota in real-time.
 
-Browser extension for the ClaudeCompanion desktop application.
+![Architecture](schema/architecture-simple.txt)
 
-## What does it do?
+## Features
 
-This extension works together with the [ClaudeCompanion desktop application](https://github.com/irumil/ClaudeCompanion) to monitor your Claude.ai API usage quota in real-time.
+- 🎯 **Real-time monitoring** - Updates every 30 seconds
+- 🎨 **Dynamic tray icon** - Shows remaining quota percentage with color coding
+- 🔔 **Smart notifications** - Alerts when quota is low or exhausted
+- ☀️ **Morning Greeting to Claude** - Automatic scheduled messages to optimize 5-hour limit
+- 🌐 **Browser integration** - Firefox extension for seamless authentication
+- ⚙️ **Hot-reload config** - No restart needed for configuration changes
+- 🔒 **Proxy support** - Works with corporate proxies
+- 📊 **Detailed tooltips** - Shows 5-hour and 7-day quota information
 
-### Features
+## Color Coding
 
-- 🔍 **Automatic detection** - Detects when you visit claude.ai
-- 🔐 **Authentication extraction** - Reads sessionKey cookie for API access
-- 📊 **Quota monitoring** - Sends data to desktop app for quota tracking
-- 🖥️ **Local-only** - All data stays on your computer (sent to localhost)
-- 🔔 **Desktop notifications** - Get notified when quota is low
+- 🟢 **Green** (> 40%) - Plenty of quota remaining
+- 🟡 **Yellow** (20-40%) - Moderate usage
+- 🔴 **Red** (< 20%) - Low quota
+- ⚪ **Gray** - Connection error
 
-## How it works
+## ⚠️ Disclaimer and Risks
 
-1. You visit [claude.ai](https://claude.ai) in Firefox
-2. Extension extracts your sessionKey cookie
-3. Extension calls Claude API to get your organization UUID
-4. Extension sends data to ClaudeCompanion desktop app (localhost:8383)
-5. Desktop app monitors your API quota and displays it in system tray
+### Important Information Before Using
+
+**ClaudeCompanion uses unofficial Claude.ai API.** This means:
+
+1. **Potential risk of account suspension**
+   - The app accesses internal API not intended for public use
+   - Claude.ai may consider this a violation of Terms of Service
+   - While risk is low with reasonable usage, we cannot fully exclude it
+
+2. **Automation may violate ToS**
+   - Automatic requests every 30-120 seconds
+   - Automatic message sending (greeting feature)
+   - May be classified as bot activity
+
+### ✅ Recommendations for Safe Usage
+
+1. **Increase polling interval**
+   ```yaml
+   poll_interval_seconds: 60  # Minimum 60 seconds
+   # or for better safety:
+   poll_interval_seconds: 120  # 2 minutes
+   ```
+
+2. **Use greeting feature carefully**
+   ```yaml
+   greeting:
+     greeting_cron: "0 8 * * *"  # ✅ Once a day - safe
+     # greeting_cron: "*/5 * * * *"  # ❌ Every 5 minutes - DANGEROUS
+   ```
+
+3. **Personal use only**
+   - One account only
+   - Don't use for mass automation
+   - Don't run on multiple accounts simultaneously
+
+4. **Don't run 24/7**
+   - Run only during work hours
+   - Stop overnight and on weekends
+
+### 📊 Risk Assessment
+
+**LOW risk** if:
+- ✅ Polling interval ≥ 60 seconds
+- ✅ Greeting maximum 1-2 times per day
+- ✅ Personal use on single account
+- ✅ Running only during work hours
+
+**HIGH risk** if:
+- ❌ Frequent requests every 5-10 seconds
+- ❌ Frequent automatic messages
+- ❌ Usage on multiple accounts
+- ❌ Running 24/7 non-stop
+
+### 🎯 Disclaimer
+
+**Use at your own risk.** Developers are not responsible for possible account suspension or other consequences of using this application. The official and safe way to work with Claude.ai is using only the web interface at claude.ai.
+
+If Claude.ai is critical for your work, consider using only the official web interface.
 
 ## Installation
 
-### From Mozilla Add-ons (AMO)
-1. Visit the [extension page on AMO](LINK_WILL_BE_ADDED)
-2. Click "Add to Firefox"
-3. Install ClaudeCompanion desktop app
-4. Visit claude.ai to activate
+### 1. Download
 
-### Manual Installation (Developer)
-1. Download the source code
-2. Open Firefox
-3. Go to `about:debugging#/runtime/this-firefox`
-4. Click "Load Temporary Add-on"
-5. Select `manifest.json` from the extension folder
+Download the latest release from [Releases](../../releases) or build from source.
 
-## Requirements
+### 2. Configure
 
-- **Firefox 57+** (or Firefox Developer Edition)
-- **ClaudeCompanion desktop application** running on port 8383
-- **Active Claude.ai account**
+Copy `config.yaml.example` to `config.yaml` and adjust settings:
 
-## Privacy
+```yaml
+proxy: "http://your-proxy:port"  # Optional: your proxy server
+browser_path: "C:\\Program Files\\Mozilla Firefox\\firefox.exe"  # Optional: custom browser
+enable_file_logging: false  # true = log to file, false = console only
+```
 
-**This extension does NOT:**
-- ❌ Send data to external servers
-- ❌ Track your browsing
-- ❌ Collect personal information
-- ❌ Store data permanently
+### 3. Install Browser Extension
 
-**All collected data is sent ONLY to:**
-- ✅ `http://localhost:8383` (your computer)
-- ✅ ClaudeCompanion desktop app
+1. Open Firefox
+2. Go to `about:debugging#/runtime/this-firefox`
+3. Click "Load Temporary Add-on"
+4. Select `extension/manifest.json`
 
-See [PRIVACY.md](extension/PRIVACY.md) for detailed privacy policy.
+### 4. Run
+
+Double-click `claudecompanion.exe` - it will start in system tray (no console window).
+
+## Usage
+
+1. **Start the application** - Run `claudecompanion.exe`
+2. **Open Claude.ai** in Firefox - The extension will automatically send authentication
+3. **Check the tray icon** - Shows remaining quota percentage
+4. **Right-click the icon** for menu:
+   - "Открыть Claude.ai" - Open Claude.ai in browser
+   - "Открыть настройки" - Edit configuration
+   - "Выход" - Exit application
 
 ## Configuration
 
-Click the extension icon or go to `about:addons` → ClaudeCompanion → Preferences to configure:
+All settings are in `config.yaml`:
 
-- **Desktop App Port** - Port where desktop app is listening (default: 8383)
-- **Auto-send** - Automatically send data when visiting claude.ai
+### Basic Settings
 
-## Permissions Explained
+```yaml
+server_port: 8383              # Port for browser extension connection
+poll_interval_seconds: 30      # How often to check quota
+proxy: ""                      # HTTP proxy (leave empty if not needed)
+browser_path: ""               # Custom browser path (leave empty for default)
+enable_file_logging: false     # Enable file logging
+```
 
-This extension requests the following permissions:
+### Notification Settings
 
-| Permission | Why we need it |
-|------------|----------------|
-| `cookies` | Read sessionKey from claude.ai for API authentication |
-| `*://claude.ai/*` | Access Claude.ai cookies and API |
-| `tabs` | Detect when you open claude.ai |
-| `webRequest` | Monitor network requests to claude.ai |
-| `storage` | Save settings (port number, auto-send preference) |
-| `notifications` | Show desktop notifications (optional) |
+```yaml
+low_value_notifications:
+  enabled: true
+  threshold: 20                # Notify when quota <= 20%
+  phrases:                     # Random phrases for low quota
+    - "Time to go home! 🏡"
+  zero_phrases:                # Random phrases for zero quota
+    - "Game over! 🎮"
+```
 
-## Troubleshooting
+### Demo Mode
 
-### Extension not working?
+For testing all features and notifications:
 
-1. **Check desktop app is running**
-   ```bash
-   # Windows
-   tasklist | findstr claudecompanion
+```yaml
+demo_mode:
+  enabled: true
+  duration_seconds: 60         # Simulates 100% → 0% in 60 seconds
+```
 
-   # Linux/Mac
-   ps aux | grep claudecompanion
-   ```
+Demo mode demonstrates:
+- Icon changes from 100% to 0% (green → yellow → red)
+- "Morning Greeting to Claude" notification at the start of each cycle ☀️
+- Low quota notifications (when threshold is reached)
+- Zero quota notifications
 
-2. **Check port 8383 is listening**
-   ```bash
-   netstat -an | findstr :8383
-   ```
+### Morning Greeting to Claude
 
-3. **Check Browser Console for errors**
-   - Press `Ctrl+Shift+J` (Firefox)
-   - Look for errors related to ClaudeCompanion
+Automatically send messages to a chat on schedule to optimize 5-hour limit:
 
-4. **Verify you're logged into claude.ai**
-   - Visit https://claude.ai
-   - Make sure you're logged in
+```yaml
+greeting:
+  greeting_cron: "0 8 * * *"   # Cron schedule: 8 AM every day
+  greeting_text: "Ok"          # Message text
+  greeting_chat_id: ""         # Chat UUID (required for greeting to work)
+```
 
-### Desktop app not receiving data?
+**How to get chat UUID:**
+1. Open the desired chat on claude.ai
+2. UUID is in the URL: `https://claude.ai/chat/{UUID}`
+3. Copy the UUID to `greeting_chat_id` setting
 
-- Check firewall settings (allow localhost connections)
-- Restart both Firefox and desktop app
-- Check desktop app logs
+**Cron schedule examples:**
+- `"0 8 * * *"` - every day at 8:00 AM
+- `"0 9 * * 1-5"` - at 9:00 AM on weekdays (Mon-Fri)
+- `"30 7 * * *"` - every day at 7:30 AM
+- `"*/5 * * * *"` - every 5 minutes (for testing)
 
-## Development
+When greeting is sent, you'll see "Morning Greeting to Claude" notification ☀️
 
-### Building from source
+### Work Hours
+
+Limit API polling to specific time ranges (e.g., only during work hours):
+
+```yaml
+work_hours:
+  enabled: false              # Enable to limit polling to work hours only
+  start: "08:00"              # Start time (HH:MM format)
+  end: "20:00"                # End time (HH:MM format)
+```
+
+**How it works:**
+- When `enabled: true`, API polling only happens between `start` and `end` times
+- Uses 24-hour format (HH:MM)
+- Supports overnight ranges (e.g., `start: "20:00"`, `end: "08:00"` for night shift)
+- Outside work hours, polling is skipped (no API requests made)
+- Helps reduce unnecessary API usage and potential detection risk
+
+**Examples:**
+- `start: "08:00"`, `end: "20:00"` - typical work day (8 AM to 8 PM)
+- `start: "09:00"`, `end: "17:00"` - standard office hours (9 AM to 5 PM)
+- `start: "20:00"`, `end: "08:00"` - overnight shift
+
+## Architecture
+
+The application consists of two parts:
+
+### 1. Browser Extension (Firefox)
+- Extracts `sessionKey` cookie from Claude.ai
+- Fetches organization UUID
+- Sends authentication data and organizationId to desktop app
+
+### 2. Desktop Application (Go)
+- **HTTP Server** - Receives data from browser extension
+- **API Client** - Polls Claude.ai API every 30 seconds
+- **Cron Scheduler** - Sends greeting messages on schedule
+- **Tray Manager** - Shows dynamic icon with percentage
+- **Icon Generator** - Creates 48x48 icons with colored numbers
+- **Notifier** - Windows Toast notifications
+- **Config Manager** - Hot-reload configuration changes
+- **Logger** - Optional file logging
+
+See [schema/architecture.md](schema/architecture.md) for detailed architecture diagram.
+
+## Building from Source
+
+### Prerequisites
+
+- Go 1.21 or higher
+- Windows (for system tray and notifications)
+- Git (optional, for cloning the repository)
+
+### Full Build (Application + Extension)
+
+#### Option 1: Automated Build (Recommended)
+
+The easiest way - use the build script:
+
+```bash
+# Build everything (application + extension)
+cd build
+build-all.bat
+
+# Or just debug version with console
+build-debug.bat
+```
+
+#### Option 2: Quick Manual Build
+
+```bash
+# 1. Clone repository (or download ZIP)
+git clone https://github.com/your-username/ClaudeCompanion.git
+cd ClaudeCompanion
+
+# 2. Install dependencies
+go mod download
+
+# 3. Build application (release version without console)
+go build -ldflags "-H windowsgui" -o dist/claudecompanion.exe ./cmd/claudecompanion
+
+# 4. Copy required files
+copy icon.ico dist\
+copy config.yaml.example dist\config.yaml
+
+# 5. Build browser extension
+cd build
+package-extension.bat
+cd ..
+```
+
+Done! Application is in `dist/claudecompanion.exe`, extension in `dist/claudecompanion-extension.zip`
+
+#### Option 3: Build with Embedded Icon
+
+To embed the icon in the exe file (for better notifications):
+
+```bash
+# 1-2. Same steps as above
+
+# 3. Install resource compiler (once)
+go install github.com/akavel/rsrc@latest
+
+# 4. Generate Windows resources
+cd cmd/claudecompanion
+rsrc -ico "..\..\icon.ico" -o rsrc_windows_amd64.syso
+cd ..\..
+
+# 5. Build with embedded icon
+go build -ldflags "-H windowsgui" -o dist/claudecompanion.exe ./cmd/claudecompanion
+
+# 6. Copy files
+copy icon.ico dist\
+copy config.yaml.example dist\config.yaml
+
+# 7. Build extension
+cd build
+package-extension.bat
+```
+
+### Debug Build (with Console)
+
+For development and debugging (with visible console):
+
+```bash
+# Build with console for viewing logs
+go build -o dist/claudecompanion-debug.exe ./cmd/claudecompanion
+
+# Run in console
+dist\claudecompanion-debug.exe
+```
+
+### Extension Only
+
+To rebuild only the browser extension:
+
+```bash
+cd build
+package-extension.bat
+```
+
+Or manually:
 
 ```bash
 cd extension
-
-# Create XPI package
-zip -r ../claudecompanion.xpi manifest.json background.js options.html options.js icon48.png icon96.png
-
-# Or use web-ext
-npm install -g web-ext
-web-ext build
+powershell -Command "Compress-Archive -Path manifest.json,background.js,options.html,options.js,icon48.png,icon96.png -DestinationPath ../dist/claudecompanion-extension.zip -Force"
 ```
 
-### Testing locally
+### Verify Build
+
+After building, check:
 
 ```bash
-web-ext run --firefox-profile=default-release
+# Check files exist
+dir dist
+
+# Should have:
+# claudecompanion.exe (release) or claudecompanion-debug.exe (debug)
+# claudecompanion-extension.zip
+# config.yaml
+# icon.ico
 ```
 
-## Contributing
+## Project Structure
 
-Contributions are welcome! Please:
+```
+ClaudeCompanion/
+├── cmd/
+│   └── claudecompanion/
+│       └── main.go              # Application entry point
+├── internal/
+│   ├── api/                     # Claude.ai API client
+│   ├── config/                  # Configuration management
+│   ├── icon/                    # Dynamic icon generator
+│   ├── logger/                  # Logging system
+│   ├── notifier/                # Toast notifications
+│   ├── server/                  # HTTP server for extension
+│   └── tray/                    # System tray manager
+├── extension/
+│   ├── manifest.json            # Firefox extension manifest
+│   ├── background.js            # Extension logic
+│   └── icon.png                 # Extension icon
+├── dist/
+│   ├── claudecompanion.exe      # Built executable
+│   ├── config.yaml              # User configuration (not in git)
+│   └── icon.ico                 # Notification icon
+├── schema/
+│   ├── architecture.md          # Detailed architecture
+│   └── architecture-simple.txt  # ASCII diagram
+├── go.mod
+├── go.sum
+├── icon.ico                     # Application icon
+├── config.yaml.example          # Example configuration
+└── README.md
+```
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+## Troubleshooting
+
+### Extension not working
+- Check that Firefox is running
+- Reload the extension in `about:debugging`
+- Open browser console for errors
+
+### No icon updates
+- Check that you visited Claude.ai in Firefox
+- Verify extension sent data (check logs if enabled)
+- Try restarting the application
+
+### Proxy errors
+- Verify proxy address in config.yaml
+- Test proxy with curl manually
+- Check proxy authentication if required
+
+### Notifications not showing
+- Enable notifications in Windows settings
+- Check notification threshold settings
+- Try demo mode to test notifications
+
+## Dependencies
+
+### Go Libraries
+- [github.com/getlantern/systray](https://github.com/getlantern/systray) - System tray
+- [github.com/go-toast/toast](https://github.com/go-toast/toast) - Toast notifications
+- [github.com/robfig/cron/v3](https://github.com/robfig/cron) - Cron scheduler for scheduled tasks
+- [gopkg.in/yaml.v3](https://gopkg.in/yaml.v3) - YAML parsing
+
+### External Tools
+- **curl.exe** - For API requests (included in Windows 10+)
+- **notepad.exe** - For opening config file
 
 ## License
 
-[Add your license here - MIT recommended]
+[Your License Here]
 
-## Links
+## Contributing
 
-- 🏠 **Homepage:** [https://github.com/irumil/ClaudeCompanion]
-- 🐛 **Bug Reports:** [https://github.com/irumil/ClaudeCompanion/issues]
-- 📖 **Documentation:** [https://github.com/irumil/ClaudeCompanion/wiki]
-- 💬 **Discussions:** [https://github.com/irumil/ClaudeCompanion/discussions]
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## Credits
+## Support
 
-Developed by **rizmailov**
-
-Built with ❤️ for the Claude.ai community.
+For issues and questions, please open an issue on GitHub.
 
 ---
 
-**Note:** This extension is not affiliated with or endorsed by Anthropic PBC.
+🇬🇧 English version | 🇷🇺 [Русская версия](README.ru.md)
