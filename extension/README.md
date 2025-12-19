@@ -1,4 +1,6 @@
-# ClaudeCompanion Context Provider
+# ClaudeCompanion Monitor
+
+**[Татарча / Tatar](./README.tt.md)**
 
 Browser extension for the ClaudeCompanion desktop application.
 
