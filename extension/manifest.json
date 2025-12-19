@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-  "name": "ClaudeCompanion Context Provider",
+  "name": "ClaudeCompanion Monitor",
   "version": "1.0.0",
   "description": "Monitors Claude.ai API quota by sending authentication data to local ClaudeCompanion desktop app. All data stays on your computer.",
   "author": "rizmailov",
