@@ -126,7 +126,7 @@ jobs:
         run: go mod download
 
       # macOS Universal Binary (Intel + Apple Silicon)
-      - name: Build macOS Universal Binary
+      - name: Build macOS Binaries
         run: |
           # Copy icon for go:embed
           cp icon.ico cmd/claudecompanion/icon.ico
@@ -135,22 +135,30 @@ jobs:
           CGO_ENABLED=1 GOARCH=amd64 go build -ldflags "-s -w" -o dist/darwin-amd64/claudecompanion ./cmd/claudecompanion
           CGO_ENABLED=1 GOARCH=arm64 go build -ldflags "-s -w" -o dist/darwin-arm64/claudecompanion ./cmd/claudecompanion
 
-          # Copy required files to both
-          cp config.yaml.example dist/darwin-amd64/config.yaml
-          cp README.md dist/darwin-amd64/
-          cp README.ru.md dist/darwin-amd64/
-          cp README.tt.md dist/darwin-amd64/
+      - name: Package macOS .app bundles
+        run: |
+          chmod +x build/package-macos-app.sh
 
-          cp config.yaml.example dist/darwin-arm64/config.yaml
-          cp README.md dist/darwin-arm64/
-          cp README.ru.md dist/darwin-arm64/
-          cp README.tt.md dist/darwin-arm64/
+          # Create .app bundles
+          ./build/package-macos-app.sh dist/darwin-amd64/claudecompanion dist/macos-intel intel
+          ./build/package-macos-app.sh dist/darwin-arm64/claudecompanion dist/macos-apple-silicon apple-silicon
+
+          # Copy documentation to each
+          cp config.yaml.example dist/macos-intel/
+          cp README.md dist/macos-intel/
+          cp README.ru.md dist/macos-intel/
+          cp README.tt.md dist/macos-intel/
+
+          cp config.yaml.example dist/macos-apple-silicon/
+          cp README.md dist/macos-apple-silicon/
+          cp README.ru.md dist/macos-apple-silicon/
+          cp README.tt.md dist/macos-apple-silicon/
 
       - name: Upload macOS artifacts
         uses: actions/upload-artifact@v4
         with:
           name: macos-builds
-          path: dist/darwin-*
+          path: dist/macos-*
 
   release:
     name: Create Release
@@ -200,9 +208,9 @@ jobs:
           # Linux
           tar -czf claudecompanion-${{ steps.get_version.outputs.VERSION }}-linux-amd64.tar.gz linux-amd64/
 
-          # macOS
-          tar -czf claudecompanion-${{ steps.get_version.outputs.VERSION }}-darwin-amd64.tar.gz darwin-amd64/
-          tar -czf claudecompanion-${{ steps.get_version.outputs.VERSION }}-darwin-arm64.tar.gz darwin-arm64/
+          # macOS (.app bundles)
+          zip -r claudecompanion-${{ steps.get_version.outputs.VERSION }}-macos-intel.zip macos-intel/
+          zip -r claudecompanion-${{ steps.get_version.outputs.VERSION }}-macos-apple-silicon.zip macos-apple-silicon/
 
           cd ..
 
@@ -210,8 +218,9 @@ jobs:
       - name: Generate checksums
         run: |
           cd dist
-          sha256sum claudecompanion-${{ steps.get_version.outputs.VERSION }}-*.zip \
-                    claudecompanion-${{ steps.get_version.outputs.VERSION }}-*.tar.gz \
+          sha256sum claudecompanion-${{ steps.get_version.outputs.VERSION }}-windows-*.zip \
+                    claudecompanion-${{ steps.get_version.outputs.VERSION }}-linux-*.tar.gz \
+                    claudecompanion-${{ steps.get_version.outputs.VERSION }}-macos-*.zip \
                     claudecompanion-extension-${{ steps.get_version.outputs.VERSION }}.xpi > checksums.txt
           cat checksums.txt
           cd ..
@@ -224,8 +233,8 @@ jobs:
             dist/claudecompanion-${{ steps.get_version.outputs.VERSION }}-windows-amd64.zip
             dist/claudecompanion-${{ steps.get_version.outputs.VERSION }}-windows-386.zip
             dist/claudecompanion-${{ steps.get_version.outputs.VERSION }}-linux-amd64.tar.gz
-            dist/claudecompanion-${{ steps.get_version.outputs.VERSION }}-darwin-amd64.tar.gz
-            dist/claudecompanion-${{ steps.get_version.outputs.VERSION }}-darwin-arm64.tar.gz
+            dist/claudecompanion-${{ steps.get_version.outputs.VERSION }}-macos-intel.zip
+            dist/claudecompanion-${{ steps.get_version.outputs.VERSION }}-macos-apple-silicon.zip
             dist/claudecompanion-extension-${{ steps.get_version.outputs.VERSION }}.xpi
             dist/checksums.txt
           body: |
@@ -234,21 +243,23 @@ jobs:
             ### 📥 Downloads
 
             **Windows:**
-            - Windows x64
-            - Windows x86
+            - `claudecompanion-${{ steps.get_version.outputs.VERSION }}-windows-amd64.zip` - для 64-bit Windows
+            - `claudecompanion-${{ steps.get_version.outputs.VERSION }}-windows-386.zip` - для 32-bit Windows
 
             **Linux:**
-            - Linux x64
+            - `claudecompanion-${{ steps.get_version.outputs.VERSION }}-linux-amd64.tar.gz` - для 64-bit Linux
 
-            **macOS:**
-            - macOS Intel
-            - macOS Apple Silicon
+            **macOS (.app bundles с иконкой):**
+            - `claudecompanion-${{ steps.get_version.outputs.VERSION }}-macos-intel.zip` - для Intel Mac
+            - `claudecompanion-${{ steps.get_version.outputs.VERSION }}-macos-apple-silicon.zip` - для Apple Silicon (M1/M2/M3)
+
+            **Установка macOS:** Распакуйте архив и перетащите `ClaudeCompanion.app` в папку Applications. См. README.txt в архиве для инструкций по обходу Gatekeeper.
 
             **Firefox Extension:**
-            - Firefox Extension (.xpi)
+            - `claudecompanion-extension-${{ steps.get_version.outputs.VERSION }}.xpi` - расширение для Firefox
 
             ### 📋 Checksums
-            See checksums.txt in the assets below
+            See `checksums.txt` in the assets below
 
             ### 📖 Documentation
             - [English README](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/README.md)
