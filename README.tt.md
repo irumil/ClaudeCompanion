@@ -1,6 +1,6 @@
 # ClaudeCompanion
 
-🇬🇧 [English](README.md) | 🇷🇺 [Русский](README.ru.md) | 🇹🇹 Татарча
+🇬🇧 [English](README.md) | 🇷🇺 [Русский](README.ru.md) | ❤️ Татарча
 
 ---
 
