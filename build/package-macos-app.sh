@@ -102,14 +102,75 @@ if [ -f "extension/icon96.png" ]; then
     cp extension/icon96.png "$RESOURCES_DIR/app-icon.png"
 fi
 
+# Create install script
+cat > "$OUTPUT_DIR/install.sh" << 'INSTALLEOF'
+#!/bin/bash
+
+echo "ClaudeCompanion Installer"
+echo "=========================="
+echo ""
+
+APP_PATH="$(dirname "$0")/ClaudeCompanion.app"
+TARGET_PATH="/Applications/ClaudeCompanion.app"
+
+# Check if app exists
+if [ ! -d "$APP_PATH" ]; then
+    echo "❌ Error: ClaudeCompanion.app not found in current directory"
+    exit 1
+fi
+
+# Fix permissions
+echo "🔧 Fixing permissions..."
+chmod +x "$APP_PATH/Contents/MacOS/ClaudeCompanion"
+
+# Copy to Applications
+echo "📦 Installing to /Applications..."
+if [ -d "$TARGET_PATH" ]; then
+    echo "   Removing old version..."
+    rm -rf "$TARGET_PATH"
+fi
+
+cp -R "$APP_PATH" "$TARGET_PATH"
+chmod +x "$TARGET_PATH/Contents/MacOS/ClaudeCompanion"
+
+# Remove quarantine
+echo "🔓 Removing quarantine attribute..."
+xattr -d com.apple.quarantine "$TARGET_PATH" 2>/dev/null || echo "   (no quarantine attribute found)"
+
+echo ""
+echo "✅ Installation complete!"
+echo ""
+echo "To start ClaudeCompanion:"
+echo "  1. Open Spotlight (Cmd+Space)"
+echo "  2. Type 'ClaudeCompanion'"
+echo "  3. Press Enter"
+echo ""
+echo "Or run from terminal:"
+echo "  open /Applications/ClaudeCompanion.app"
+echo ""
+echo "Config location:"
+echo "  ~/Library/Application Support/ClaudeCompanion/config.yaml"
+echo ""
+INSTALLEOF
+
+chmod +x "$OUTPUT_DIR/install.sh"
+
 # Create README with instructions
 cat > "$OUTPUT_DIR/README.txt" << 'EOF'
 ClaudeCompanion для macOS
 =========================
 
-УСТАНОВКА:
+БЫСТРАЯ УСТАНОВКА (рекомендуется):
+1. Откройте Терминал в этой папке
+2. Запустите: ./install.sh
+3. Готово! Приложение установлено в /Applications
+
+РУЧНАЯ УСТАНОВКА:
 1. Переместите ClaudeCompanion.app в папку /Applications
-2. При первом запуске macOS заблокирует приложение (неподписанное)
+2. ВАЖНО: Установите права на выполнение (в Терминале):
+   chmod +x /Applications/ClaudeCompanion.app/Contents/MacOS/ClaudeCompanion
+
+3. При первом запуске macOS заблокирует приложение (неподписанное)
 
 ОБХОД GATEKEEPER (выберите один способ):
 
@@ -123,9 +184,14 @@ ClaudeCompanion для macOS
 2. Выберите "Открыть" в меню
 3. Подтвердите открытие в диалоговом окне
 
-Способ 3 (через терминал):
+Способ 3 (через терминал - рекомендуется):
 cd /Applications
+chmod +x ClaudeCompanion.app/Contents/MacOS/ClaudeCompanion
 xattr -d com.apple.quarantine ClaudeCompanion.app
+open ClaudeCompanion.app
+
+ЕСЛИ ПОЛУЧАЕТЕ "permission denied":
+chmod +x /Applications/ClaudeCompanion.app/Contents/MacOS/ClaudeCompanion
 
 РАСПОЛОЖЕНИЕ КОНФИГА:
 ~/Library/Application Support/ClaudeCompanion/config.yaml

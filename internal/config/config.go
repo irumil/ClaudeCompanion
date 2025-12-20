@@ -226,7 +226,7 @@ func (m *Manager) createDefaultConfig() error {
 	return os.WriteFile(m.configPath, data, 0644)
 }
 
-// getConfigPath returns the config file path (next to executable)
+// getConfigPath returns the config file path
 func getConfigPath() (string, error) {
 	// Get executable path
 	exePath, err := os.Executable()
@@ -237,7 +237,19 @@ func getConfigPath() (string, error) {
 	// Get directory containing the executable
 	exeDir := filepath.Dir(exePath)
 
-	// Config file in same directory as executable
+	// On macOS, use Application Support directory
+	// Check if running from .app bundle
+	if filepath.Base(exeDir) == "MacOS" && filepath.Base(filepath.Dir(exeDir)) == "Contents" {
+		// Running from .app bundle, use ~/Library/Application Support
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			return "", fmt.Errorf("failed to get home directory: %w", err)
+		}
+		configDir := filepath.Join(homeDir, "Library", "Application Support", "ClaudeCompanion")
+		return filepath.Join(configDir, "config.yaml"), nil
+	}
+
+	// For Windows/Linux or when running from source, use executable directory
 	return filepath.Join(exeDir, "config.yaml"), nil
 }
 

@@ -121,7 +121,7 @@ func main() {
 	// Set refresh callback for manual statistics update
 	app.trayMgr.SetRefreshCallback(func() {
 		logger.Info("Manual refresh requested by user")
-		app.poll()
+		app.pollManual()
 	})
 
 	// Don't set OpenSettings callback - use default implementation from tray.go
@@ -161,9 +161,10 @@ func main() {
 		app.trayMgr.SetBrowserPath(newCfg.BrowserPath)
 		logger.Info("    Browser path updated: %s", newCfg.BrowserPath)
 
-		logger.Info("    Reloading API client with new settings...")
-		app.apiClient = api.NewClient(newCfg.Proxy, newCfg.CurlPath)
-		logger.Info("    API client reloaded successfully")
+		// Update API client settings (preserves cookies and context)
+		logger.Info("    Updating API client settings (cookies preserved)...")
+		app.apiClient.UpdateSettings(newCfg.Proxy, newCfg.CurlPath)
+		logger.Info("    API client settings updated successfully")
 	})
 
 	// Start HTTP server (unless in demo mode)
@@ -264,8 +265,18 @@ func (a *App) pollLoop() {
 	}
 }
 
-// poll performs a single API poll
+// poll performs a single API poll (automatic)
 func (a *App) poll() {
+	a.doPoll(false)
+}
+
+// pollManual performs a manual API poll (user requested)
+func (a *App) pollManual() {
+	a.doPoll(true)
+}
+
+// doPoll performs a single API poll
+func (a *App) doPoll(isManual bool) {
 	cfg := a.configMgr.Get()
 
 	// Check if we have context
@@ -275,14 +286,19 @@ func (a *App) poll() {
 		return
 	}
 
-	// Check work hours
-	if !cfg.WorkHours.IsWithinWorkHours() {
-		logger.Debug("Outside work hours, skipping poll")
+	// Check work hours (skip check if manual request)
+	if !isManual && !cfg.WorkHours.IsWithinWorkHours() {
+		logger.Debug("Outside work hours, skipping automatic poll")
 		return
 	}
 
 	// Fetch usage
-	logger.Debug("Fetching usage from API...")
+	if isManual {
+		logger.Info("Manual poll: Fetching usage from API...")
+	} else {
+		logger.Debug("Automatic poll: Fetching usage from API...")
+	}
+
 	usage, err := a.apiClient.GetUsage()
 	if err != nil {
 		logger.Error("API request failed (error #%d): %v", a.errorCount+1, err)

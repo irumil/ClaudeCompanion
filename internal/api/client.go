@@ -50,6 +50,13 @@ func (c *Client) SetContext(cookies, targetURL, organizationID string, headers m
 		targetURL, organizationID, len(cookies), len(headers))
 }
 
+// UpdateSettings updates proxy and curl path without clearing context (cookies, headers, etc.)
+func (c *Client) UpdateSettings(proxy, curlPath string) {
+	c.proxy = proxy
+	c.curlPath = curlPath
+	log.Printf("Settings updated: Proxy=%s, CurlPath=%s (context preserved)", proxy, curlPath)
+}
+
 // HasContext returns true if cookies are set
 func (c *Client) HasContext() bool {
 	return c.cookies != "" && c.targetURL != ""

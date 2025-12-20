@@ -208,9 +208,9 @@ jobs:
           # Linux
           tar -czf claudecompanion-${{ steps.get_version.outputs.VERSION }}-linux-amd64.tar.gz linux-amd64/
 
-          # macOS (.app bundles)
-          zip -r claudecompanion-${{ steps.get_version.outputs.VERSION }}-macos-intel.zip macos-intel/
-          zip -r claudecompanion-${{ steps.get_version.outputs.VERSION }}-macos-apple-silicon.zip macos-apple-silicon/
+          # macOS (.app bundles) - use tar.gz to preserve permissions
+          tar -czf claudecompanion-${{ steps.get_version.outputs.VERSION }}-macos-intel.tar.gz macos-intel/
+          tar -czf claudecompanion-${{ steps.get_version.outputs.VERSION }}-macos-apple-silicon.tar.gz macos-apple-silicon/
 
           cd ..
 
@@ -219,8 +219,7 @@ jobs:
         run: |
           cd dist
           sha256sum claudecompanion-${{ steps.get_version.outputs.VERSION }}-windows-*.zip \
-                    claudecompanion-${{ steps.get_version.outputs.VERSION }}-linux-*.tar.gz \
-                    claudecompanion-${{ steps.get_version.outputs.VERSION }}-macos-*.zip \
+                    claudecompanion-${{ steps.get_version.outputs.VERSION }}-*.tar.gz \
                     claudecompanion-extension-${{ steps.get_version.outputs.VERSION }}.xpi > checksums.txt
           cat checksums.txt
           cd ..
@@ -233,8 +232,8 @@ jobs:
             dist/claudecompanion-${{ steps.get_version.outputs.VERSION }}-windows-amd64.zip
             dist/claudecompanion-${{ steps.get_version.outputs.VERSION }}-windows-386.zip
             dist/claudecompanion-${{ steps.get_version.outputs.VERSION }}-linux-amd64.tar.gz
-            dist/claudecompanion-${{ steps.get_version.outputs.VERSION }}-macos-intel.zip
-            dist/claudecompanion-${{ steps.get_version.outputs.VERSION }}-macos-apple-silicon.zip
+            dist/claudecompanion-${{ steps.get_version.outputs.VERSION }}-macos-intel.tar.gz
+            dist/claudecompanion-${{ steps.get_version.outputs.VERSION }}-macos-apple-silicon.tar.gz
             dist/claudecompanion-extension-${{ steps.get_version.outputs.VERSION }}.xpi
             dist/checksums.txt
           body: |
@@ -250,10 +249,16 @@ jobs:
             - `claudecompanion-${{ steps.get_version.outputs.VERSION }}-linux-amd64.tar.gz` - для 64-bit Linux
 
             **macOS (.app bundles с иконкой):**
-            - `claudecompanion-${{ steps.get_version.outputs.VERSION }}-macos-intel.zip` - для Intel Mac
-            - `claudecompanion-${{ steps.get_version.outputs.VERSION }}-macos-apple-silicon.zip` - для Apple Silicon (M1/M2/M3)
+            - `claudecompanion-${{ steps.get_version.outputs.VERSION }}-macos-intel.tar.gz` - для Intel Mac
+            - `claudecompanion-${{ steps.get_version.outputs.VERSION }}-macos-apple-silicon.tar.gz` - для Apple Silicon (M1/M2/M3)
 
-            **Установка macOS:** Распакуйте архив и перетащите `ClaudeCompanion.app` в папку Applications. См. README.txt в архиве для инструкций по обходу Gatekeeper.
+            **Установка macOS:**
+            ```bash
+            tar -xzf claudecompanion-*-macos-*.tar.gz
+            cd macos-*/
+            ./install.sh
+            ```
+            Или см. README.txt в архиве для ручной установки.
 
             **Firefox Extension:**
             - `claudecompanion-extension-${{ steps.get_version.outputs.VERSION }}.xpi` - расширение для Firefox
