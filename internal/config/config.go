@@ -16,7 +16,6 @@ import (
 type Config struct {
 	ServerPort            int                   `yaml:"server_port"`
 	PollIntervalSeconds   int                   `yaml:"poll_interval_seconds"`
-	UseCurlFallback       bool                  `yaml:"use_curl_fallback"`
 	GrayModeThreshold     int                   `yaml:"gray_mode_threshold"`
 	NotificationThreshold int                   `yaml:"notification_threshold"`
 	Proxy                 string                `yaml:"proxy"`
@@ -181,7 +180,6 @@ func (m *Manager) createDefaultConfig() error {
 	defaultConfig := &Config{
 		ServerPort:            8383,
 		PollIntervalSeconds:   60, // Changed from 30 to 60 for safety
-		UseCurlFallback:       true,
 		GrayModeThreshold:     5,
 		NotificationThreshold: 10,
 		Proxy:                 "",
@@ -213,7 +211,7 @@ func (m *Manager) createDefaultConfig() error {
 			ChatID: "", // User must specify chat UUID
 		},
 		WorkHours: WorkHours{
-			Enabled: false,   // Disabled by default
+			Enabled: true,    // Enabled by default
 			Start:   "08:00", // 8 AM
 			End:     "20:00", // 8 PM
 		},

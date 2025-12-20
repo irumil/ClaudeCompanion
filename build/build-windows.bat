@@ -43,7 +43,6 @@ go build -ldflags="-s -w -H windowsgui" -o %OUTPUT_DIR%\%APP_NAME% %MAIN_PACKAGE
 if %ERRORLEVEL% EQU 0 (
     REM Copy required files
     echo Copying required files...
-    copy icon.ico %OUTPUT_DIR%\ >nul 2>nul
     if not exist %OUTPUT_DIR%\config.yaml (
         copy config.yaml.example %OUTPUT_DIR%\config.yaml >nul 2>nul
     )
@@ -54,9 +53,8 @@ if %ERRORLEVEL% EQU 0 (
     echo ========================================
     echo.
     echo Output files:
-    echo   %OUTPUT_DIR%\%APP_NAME% (with embedded icon)
-    echo   %OUTPUT_DIR%\icon.ico (for notifications)
-    echo   %OUTPUT_DIR%\config.yaml (configuration)
+    echo   %OUTPUT_DIR%\%APP_NAME% ^(with embedded icon^)
+    echo   %OUTPUT_DIR%\config.yaml ^(configuration^)
     echo.
     echo To run the application:
     echo   %OUTPUT_DIR%\%APP_NAME%

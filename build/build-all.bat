@@ -51,7 +51,6 @@ if %ERRORLEVEL% NEQ 0 (
 
 echo.
 echo [4/6] Copying required files...
-copy icon.ico dist\ >nul 2>nul
 if not exist dist\config.yaml (
     copy config.yaml.example dist\config.yaml >nul 2>nul
     echo Created dist\config.yaml from example
@@ -85,12 +84,6 @@ if exist dist\config.yaml (
     echo [FAIL] config.yaml missing
 )
 
-if exist dist\icon.ico (
-    echo [OK] icon.ico (for notifications)
-) else (
-    echo [FAIL] icon.ico missing
-)
-
 echo.
 echo ==========================================
 echo Build completed successfully!
@@ -100,7 +93,6 @@ echo Output files in 'dist' folder:
 echo   - claudecompanion.exe (Desktop application with embedded icon)
 echo   - claudecompanion-extension.zip (Browser extension)
 echo   - config.yaml (Configuration file)
-echo   - icon.ico (Application icon for notifications)
 echo.
 echo Next steps:
 echo   1. Configure dist\config.yaml (optional)

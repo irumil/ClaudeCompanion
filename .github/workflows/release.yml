@@ -44,7 +44,6 @@ jobs:
           GOOS=windows GOARCH=amd64 go build -ldflags "-H windowsgui -s -w" -o dist/windows-amd64/claudecompanion.exe ./cmd/claudecompanion
 
           # Copy required files
-          cp icon.ico dist/windows-amd64/
           cp config.yaml.example dist/windows-amd64/config.yaml
           cp README.md dist/windows-amd64/
           cp README.ru.md dist/windows-amd64/
@@ -64,7 +63,6 @@ jobs:
           GOOS=windows GOARCH=386 go build -ldflags "-H windowsgui -s -w" -o dist/windows-386/claudecompanion.exe ./cmd/claudecompanion
 
           # Copy required files
-          cp icon.ico dist/windows-386/
           cp config.yaml.example dist/windows-386/config.yaml
           cp README.md dist/windows-386/
           cp README.ru.md dist/windows-386/

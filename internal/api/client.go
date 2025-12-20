@@ -32,7 +32,7 @@ type Client struct {
 }
 
 // NewClient creates a new API client
-func NewClient(proxy string, useCurlFallback bool) *Client {
+func NewClient(proxy string) *Client {
 	return &Client{
 		proxy: proxy,
 	}

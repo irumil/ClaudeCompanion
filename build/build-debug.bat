@@ -51,7 +51,6 @@ if %ERRORLEVEL% NEQ 0 (
 
 echo.
 echo [4/4] Copying required files...
-copy icon.ico dist\ >nul 2>nul
 if not exist dist\config.yaml (
     copy config.yaml.example dist\config.yaml >nul 2>nul
     echo Created dist\config.yaml from example

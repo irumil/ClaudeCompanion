@@ -3,7 +3,6 @@
 
 server_port: 8383
 poll_interval_seconds: 60     # Recommended: 60-120 seconds to reduce risk of account suspension
-use_curl_fallback: true
 gray_mode_threshold: 5        # N errors before showing gray icon
 notification_threshold: 10    # N errors before showing notification
 proxy: ""                     # Leave empty for no proxy, or set "http://your-proxy:port"
@@ -39,6 +38,6 @@ greeting:
   greeting_chat_id: ""        # UUID of chat conversation (required for greeting to work)
 
 work_hours:
-  enabled: false              # Enable to limit polling to work hours only
+  enabled: true               # Enable to limit polling to work hours only
   start: "08:00"              # Start time (HH:MM format)
   end: "20:00"                # End time (HH:MM format)
