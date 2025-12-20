@@ -207,7 +207,6 @@ graph TB
 ```yaml
 server_port: 8383
 poll_interval_seconds: 30
-use_curl_fallback: true
 gray_mode_threshold: 5        # N errors before gray icon
 notification_threshold: 10    # N errors before notification
 proxy: ""                     # Optional: "http://your-proxy:port"

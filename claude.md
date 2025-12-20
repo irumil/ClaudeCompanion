@@ -276,7 +276,6 @@ demo_mode:
 ```yaml
 server_port: 8383                    # HTTP server port for extension
 poll_interval_seconds: 30            # API polling interval
-use_curl_fallback: true              # Always true (HTTP client removed)
 gray_mode_threshold: 5               # Errors before gray icon
 notification_threshold: 10           # Errors before notification
 proxy: ""                            # Optional: "http://host:port"

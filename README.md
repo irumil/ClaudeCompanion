@@ -1,12 +1,16 @@
 # ClaudeCompanion
 
+🇬🇧 English | 🇷🇺 [Русский](README.ru.md) | 🇹🇹 [Татарча](README.tt.md)
+
+---
+
 System tray application for monitoring Claude.ai API usage quota in real-time.
 
 ![Architecture](schema/architecture-simple.txt)
 
 ## Features
 
-- 🎯 **Real-time monitoring** - Updates every 30 seconds
+- 🎯 **Real-time monitoring** - Updates every 60 seconds
 - 🎨 **Dynamic tray icon** - Shows remaining quota percentage with color coding
 - 🔔 **Smart notifications** - Alerts when quota is low or exhausted
 - ☀️ **Morning Greeting to Claude** - Automatic scheduled messages to optimize 5-hour limit
@@ -128,7 +132,7 @@ All settings are in `config.yaml`:
 
 ```yaml
 server_port: 8383              # Port for browser extension connection
-poll_interval_seconds: 30      # How often to check quota
+poll_interval_seconds: 60      # How often to check quota
 proxy: ""                      # HTTP proxy (leave empty if not needed)
 browser_path: ""               # Custom browser path (leave empty for default)
 enable_file_logging: false     # Enable file logging
@@ -192,7 +196,7 @@ Limit API polling to specific time ranges (e.g., only during work hours):
 
 ```yaml
 work_hours:
-  enabled: false              # Enable to limit polling to work hours only
+  enabled: true               # Enable to limit polling to work hours only
   start: "08:00"              # Start time (HH:MM format)
   end: "20:00"                # End time (HH:MM format)
 ```
@@ -220,7 +224,7 @@ The application consists of two parts:
 
 ### 2. Desktop Application (Go)
 - **HTTP Server** - Receives data from browser extension
-- **API Client** - Polls Claude.ai API every 30 seconds
+- **API Client** - Polls Claude.ai API every 60 seconds
 - **Cron Scheduler** - Sends greeting messages on schedule
 - **Tray Manager** - Shows dynamic icon with percentage
 - **Icon Generator** - Creates 48x48 icons with colored numbers
@@ -267,7 +271,6 @@ go mod download
 go build -ldflags "-H windowsgui" -o dist/claudecompanion.exe ./cmd/claudecompanion
 
 # 4. Copy required files
-copy icon.ico dist\
 copy config.yaml.example dist\config.yaml
 
 # 5. Build browser extension
@@ -297,7 +300,6 @@ cd ..\..
 go build -ldflags "-H windowsgui" -o dist/claudecompanion.exe ./cmd/claudecompanion
 
 # 6. Copy files
-copy icon.ico dist\
 copy config.yaml.example dist\config.yaml
 
 # 7. Build extension
@@ -345,7 +347,6 @@ dir dist
 # claudecompanion.exe (release) or claudecompanion-debug.exe (debug)
 # claudecompanion-extension.zip
 # config.yaml
-# icon.ico
 ```
 
 ## Project Structure
@@ -369,8 +370,7 @@ ClaudeCompanion/
 │   └── icon.png                 # Extension icon
 ├── dist/
 │   ├── claudecompanion.exe      # Built executable
-│   ├── config.yaml              # User configuration (not in git)
-│   └── icon.ico                 # Notification icon
+│   └── config.yaml              # User configuration (not in git)
 ├── schema/
 │   ├── architecture.md          # Detailed architecture
 │   └── architecture-simple.txt  # ASCII diagram
@@ -426,7 +426,3 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## Support
 
 For issues and questions, please open an issue on GitHub.
-
----
-
-🇬🇧 English version | 🇷🇺 [Русская версия](README.ru.md) | [Татарча](README.tt.md)

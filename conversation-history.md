@@ -298,7 +298,6 @@ type ContextData struct {
   - Добавлено поле `userAgent` в структуру `Client`
   - Метод `SetContext()` теперь принимает `userAgent`
   - Во всех curl запросах используется User-Agent из браузера
-  - Fallback на дефолтный User-Agent если не передан
 
 ```go
 // Use browser User-Agent if available, otherwise use default
@@ -607,7 +606,6 @@ require (
 ```yaml
 server_port: 8383
 poll_interval_seconds: 60
-use_curl_fallback: true
 gray_mode_threshold: 5
 notification_threshold: 10
 proxy: ""
