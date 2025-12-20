@@ -309,15 +309,34 @@ sudo pacman -S libappindicator-gtk3 gtk3 curl libnotify
 ```
 
 **Building:**
+
+There are two ways to build for Linux:
+
+**Option 1: Using Docker (recommended for non-Linux systems)**
 ```bash
 # 1. Clone repository (or download ZIP)
 git clone https://github.com/irumil/ClaudeCompanion.git
 cd ClaudeCompanion
 
-# 2. Install Go dependencies
-go mod download
+# 2. Run automated build script (requires Docker)
+cd build
+./build-linux.sh
 
-# 3. Build for Linux
+# Builds both amd64 and arm64 binaries:
+# - dist/linux-amd64/claudecompanion
+# - dist/linux-arm64/claudecompanion (if cross-compilation succeeds)
+```
+
+**Option 2: Direct build on Linux**
+```bash
+# 1. Clone repository (or download ZIP)
+git clone https://github.com/irumil/ClaudeCompanion.git
+cd ClaudeCompanion
+
+# 2. Install system dependencies (Ubuntu/Debian)
+sudo apt-get install -y libayatana-appindicator3-dev libgtk-3-dev pkg-config
+
+# 3. Build
 CGO_ENABLED=1 go build -ldflags "-s -w" -o dist/claudecompanion ./cmd/claudecompanion
 
 # 4. Copy config

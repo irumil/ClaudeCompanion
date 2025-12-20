@@ -26,6 +26,11 @@ jobs:
       - name: Install dependencies
         run: go mod download
 
+      - name: Install Linux system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libayatana-appindicator3-dev libgtk-3-dev pkg-config gcc-aarch64-linux-gnu
+
       - name: Install rsrc for Windows icon embedding
         run: go install github.com/akavel/rsrc@latest
 
@@ -71,7 +76,7 @@ jobs:
       # Linux amd64
       - name: Build Linux amd64
         run: |
-          GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -o dist/linux-amd64/claudecompanion ./cmd/claudecompanion
+          CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -o dist/linux-amd64/claudecompanion ./cmd/claudecompanion
           cp config.yaml.example dist/linux-amd64/config.yaml
           cp README.md dist/linux-amd64/
           cp README.ru.md dist/linux-amd64/
@@ -80,7 +85,7 @@ jobs:
       # Linux arm64
       - name: Build Linux arm64
         run: |
-          GOOS=linux GOARCH=arm64 go build -ldflags "-s -w" -o dist/linux-arm64/claudecompanion ./cmd/claudecompanion
+          CGO_ENABLED=1 GOOS=linux GOARCH=arm64 CC=aarch64-linux-gnu-gcc go build -ldflags "-s -w" -o dist/linux-arm64/claudecompanion ./cmd/claudecompanion
           cp config.yaml.example dist/linux-arm64/config.yaml
           cp README.md dist/linux-arm64/
           cp README.ru.md dist/linux-arm64/
@@ -89,7 +94,7 @@ jobs:
       # macOS amd64
       - name: Build macOS amd64
         run: |
-          GOOS=darwin GOARCH=amd64 go build -ldflags "-s -w" -o dist/darwin-amd64/claudecompanion ./cmd/claudecompanion
+          CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 go build -ldflags "-s -w" -o dist/darwin-amd64/claudecompanion ./cmd/claudecompanion
           cp config.yaml.example dist/darwin-amd64/config.yaml
           cp README.md dist/darwin-amd64/
           cp README.ru.md dist/darwin-amd64/
@@ -98,7 +103,7 @@ jobs:
       # macOS arm64 (Apple Silicon)
       - name: Build macOS arm64
         run: |
-          GOOS=darwin GOARCH=arm64 go build -ldflags "-s -w" -o dist/darwin-arm64/claudecompanion ./cmd/claudecompanion
+          CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 go build -ldflags "-s -w" -o dist/darwin-arm64/claudecompanion ./cmd/claudecompanion
           cp config.yaml.example dist/darwin-arm64/config.yaml
           cp README.md dist/darwin-arm64/
           cp README.ru.md dist/darwin-arm64/

@@ -311,15 +311,34 @@ sudo pacman -S libappindicator-gtk3 gtk3 curl libnotify
 ```
 
 **Сборка:**
+
+Есть два способа сборки для Linux:
+
+**Вариант 1: Использование Docker (рекомендуется для не-Linux систем)**
 ```bash
 # 1. Клонировать репозиторий (или скачать ZIP)
 git clone https://github.com/irumil/ClaudeCompanion.git
 cd ClaudeCompanion
 
-# 2. Установить зависимости Go
-go mod download
+# 2. Запустить автоматический скрипт сборки (требуется Docker)
+cd build
+./build-linux.sh
 
-# 3. Собрать для Linux
+# Собирает бинарники для amd64 и arm64:
+# - dist/linux-amd64/claudecompanion
+# - dist/linux-arm64/claudecompanion (если кросс-компиляция успешна)
+```
+
+**Вариант 2: Прямая сборка на Linux**
+```bash
+# 1. Клонировать репозиторий (или скачать ZIP)
+git clone https://github.com/irumil/ClaudeCompanion.git
+cd ClaudeCompanion
+
+# 2. Установить системные зависимости (Ubuntu/Debian)
+sudo apt-get install -y libayatana-appindicator3-dev libgtk-3-dev pkg-config
+
+# 3. Собрать
 CGO_ENABLED=1 go build -ldflags "-s -w" -o dist/claudecompanion ./cmd/claudecompanion
 
 # 4. Скопировать конфиг
