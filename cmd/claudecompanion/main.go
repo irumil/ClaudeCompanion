@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"math/rand"
 	"time"
 
@@ -14,6 +15,9 @@ import (
 	"github.com/getlantern/systray"
 	"github.com/robfig/cron/v3"
 )
+
+//go:embed icon.ico
+var embeddedIcon []byte
 
 // App represents the main application
 type App struct {
@@ -104,7 +108,7 @@ func main() {
 	logger.Info("  - Tray manager initialized")
 
 	logger.Info("  - Notifier...")
-	app.notifier = notifier.NewNotifier()
+	app.notifier = notifier.NewNotifier(embeddedIcon)
 	logger.Info("  - Notifier initialized")
 
 	// Set callbacks

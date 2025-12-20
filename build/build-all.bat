@@ -19,7 +19,7 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b 1
 )
 
-echo [1/5] Installing dependencies...
+echo [1/6] Installing dependencies...
 go mod download
 if %ERRORLEVEL% NEQ 0 (
     echo ERROR: Failed to download dependencies
@@ -28,7 +28,20 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 echo.
-echo [2/5] Building application (release mode)...
+echo [2/6] Preparing icon for embedding...
+REM Copy icon to cmd/claudecompanion for go:embed
+copy icon.ico cmd\claudecompanion\icon.ico >nul 2>nul
+
+REM Generate Windows resource file for exe icon
+cd cmd\claudecompanion
+"%USERPROFILE%\go\bin\rsrc.exe" -ico "..\..\icon.ico" -o rsrc_windows_amd64.syso
+if %ERRORLEVEL% NEQ 0 (
+    echo WARNING: Failed to generate Windows resource, continuing anyway...
+)
+cd ..\..
+
+echo.
+echo [3/6] Building application (release mode)...
 go build -ldflags "-H windowsgui" -o dist/claudecompanion.exe ./cmd/claudecompanion
 if %ERRORLEVEL% NEQ 0 (
     echo ERROR: Failed to build application
@@ -37,7 +50,7 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 echo.
-echo [3/5] Copying required files...
+echo [4/6] Copying required files...
 copy icon.ico dist\ >nul 2>nul
 if not exist dist\config.yaml (
     copy config.yaml.example dist\config.yaml >nul 2>nul
@@ -47,15 +60,15 @@ if not exist dist\config.yaml (
 )
 
 echo.
-echo [4/5] Building browser extension...
+echo [5/6] Building browser extension...
 cd build
 call package-extension.bat
 cd ..
 
 echo.
-echo [5/5] Verifying build...
+echo [6/6] Verifying build...
 if exist dist\claudecompanion.exe (
-    echo [OK] claudecompanion.exe
+    echo [OK] claudecompanion.exe (with embedded icon)
 ) else (
     echo [FAIL] claudecompanion.exe missing
 )
@@ -73,7 +86,7 @@ if exist dist\config.yaml (
 )
 
 if exist dist\icon.ico (
-    echo [OK] icon.ico
+    echo [OK] icon.ico (for notifications)
 ) else (
     echo [FAIL] icon.ico missing
 )
@@ -84,10 +97,10 @@ echo Build completed successfully!
 echo ==========================================
 echo.
 echo Output files in 'dist' folder:
-echo   - claudecompanion.exe (Desktop application)
+echo   - claudecompanion.exe (Desktop application with embedded icon)
 echo   - claudecompanion-extension.zip (Browser extension)
 echo   - config.yaml (Configuration file)
-echo   - icon.ico (Application icon)
+echo   - icon.ico (Application icon for notifications)
 echo.
 echo Next steps:
 echo   1. Configure dist\config.yaml (optional)

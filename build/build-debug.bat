@@ -19,7 +19,7 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b 1
 )
 
-echo [1/3] Installing dependencies...
+echo [1/4] Installing dependencies...
 go mod download
 if %ERRORLEVEL% NEQ 0 (
     echo ERROR: Failed to download dependencies
@@ -28,7 +28,20 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 echo.
-echo [2/3] Building application (debug mode with console)...
+echo [2/4] Preparing icon for embedding...
+REM Copy icon to cmd/claudecompanion for go:embed
+copy icon.ico cmd\claudecompanion\icon.ico >nul 2>nul
+
+REM Generate Windows resource file for exe icon
+cd cmd\claudecompanion
+"%USERPROFILE%\go\bin\rsrc.exe" -ico "..\..\icon.ico" -o rsrc_windows_amd64.syso
+if %ERRORLEVEL% NEQ 0 (
+    echo WARNING: Failed to generate Windows resource, continuing anyway...
+)
+cd ..\..
+
+echo.
+echo [3/4] Building application (debug mode with console)...
 go build -o dist/claudecompanion-debug.exe ./cmd/claudecompanion
 if %ERRORLEVEL% NEQ 0 (
     echo ERROR: Failed to build application
@@ -37,7 +50,7 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 echo.
-echo [3/3] Copying required files...
+echo [4/4] Copying required files...
 copy icon.ico dist\ >nul 2>nul
 if not exist dist\config.yaml (
     copy config.yaml.example dist\config.yaml >nul 2>nul

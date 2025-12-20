@@ -17,15 +17,9 @@ vendor/
 go.work
 
 # Build artifacts
-dist
-dist/*.exe
-dist/*.log
-dist/*.zip
-dist/icon.ico
-dist/claudecompanion-*.log
+dist/
 
 # Configuration files (contain sensitive data)
-dist/config.yaml
 config.yaml
 
 # IDE specific files
@@ -49,5 +43,7 @@ Thumbs.db
 
 # Windows resource files (generated)
 cmd/claudecompanion/rsrc_windows_amd64.syso
+cmd/claudecompanion/rsrc_windows_386.syso
+cmd/claudecompanion/icon.ico
 cmd/claudecompanion/winres/
 cmd/claudecompanion/app.rc

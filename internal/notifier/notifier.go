@@ -19,30 +19,54 @@ type NotificationState struct {
 
 // Notifier handles system notifications
 type Notifier struct {
-	state *NotificationState
+	state        *NotificationState
+	embeddedIcon []byte
 }
 
 // NewNotifier creates a new notifier
-func NewNotifier() *Notifier {
+func NewNotifier(embeddedIcon []byte) *Notifier {
 	return &Notifier{
-		state: &NotificationState{},
+		state:        &NotificationState{},
+		embeddedIcon: embeddedIcon,
 	}
 }
 
 // getIconPath returns the path to the application icon
-func getIconPath() string {
+// Extracts embedded icon to temp file if needed
+func (n *Notifier) getIconPath() string {
+	// Try external icon.ico first (for backwards compatibility)
 	exePath, err := os.Executable()
-	if err != nil {
+	if err == nil {
+		exeDir := filepath.Dir(exePath)
+		iconPath := filepath.Join(exeDir, "icon.ico")
+		if _, err := os.Stat(iconPath); err == nil {
+			return iconPath
+		}
+	}
+
+	// If no embedded icon provided, return empty
+	if len(n.embeddedIcon) == 0 {
+		log.Println("No embedded icon available")
 		return ""
 	}
-	exeDir := filepath.Dir(exePath)
-	iconPath := filepath.Join(exeDir, "icon.ico")
 
-	// If icon.ico doesn't exist, use the exe itself (Windows can extract icon from exe)
-	if _, err := os.Stat(iconPath); os.IsNotExist(err) {
-		return exePath
+	// Extract embedded icon to temp file
+	tempDir := os.TempDir()
+	tempIconPath := filepath.Join(tempDir, "claudecompanion-icon.ico")
+
+	// Check if temp icon already exists
+	if _, err := os.Stat(tempIconPath); err == nil {
+		return tempIconPath
 	}
-	return iconPath
+
+	// Write embedded icon to temp file
+	if err := os.WriteFile(tempIconPath, n.embeddedIcon, 0644); err != nil {
+		log.Printf("Failed to write embedded icon to temp file: %v", err)
+		return ""
+	}
+
+	log.Printf("Extracted embedded icon to: %s", tempIconPath)
+	return tempIconPath
 }
 
 // NotifyError shows an error notification (for authorization issues)
@@ -59,7 +83,7 @@ func (n *Notifier) NotifyError(errorCount int, threshold int) {
 			AppID:   "ClaudeCompanion",
 			Title:   title,
 			Message: message,
-			Icon:    getIconPath(),
+			Icon:    n.getIconPath(),
 		}
 		if err := notification.Push(); err != nil {
 			log.Printf("Failed to show notification: %v", err)
@@ -85,7 +109,7 @@ func (n *Notifier) NotifyLowValue(value int, phrase string) {
 			AppID:   "ClaudeCompanion",
 			Title:   title,
 			Message: message,
-			Icon:    getIconPath(),
+			Icon:    n.getIconPath(),
 		}
 		if err := notification.Push(); err != nil {
 			log.Printf("Failed to show notification: %v", err)
@@ -112,7 +136,7 @@ func (n *Notifier) NotifyZero(phrase string, resetTime string) {
 			AppID:   "ClaudeCompanion",
 			Title:   title,
 			Message: message,
-			Icon:    getIconPath(),
+			Icon:    n.getIconPath(),
 		}
 		if err := notification.Push(); err != nil {
 			log.Printf("Failed to show notification: %v", err)
@@ -166,7 +190,7 @@ func (n *Notifier) NotifyGreeting() {
 		AppID: "ClaudeCompanion",
 		Title: title,
 		//Message: message,
-		Icon: getIconPath(),
+		Icon: n.getIconPath(),
 	}
 	if err := notification.Push(); err != nil {
 		log.Printf("Failed to show greeting notification: %v", err)
