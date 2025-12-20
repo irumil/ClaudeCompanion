@@ -19,6 +19,19 @@ echo Downloading dependencies...
 go mod tidy
 go mod download
 
+REM Prepare icon
+echo Preparing icon for embedding...
+copy icon.ico cmd\claudecompanion\icon.ico >nul 2>nul
+
+REM Generate Windows resource file
+echo Generating Windows resource file...
+cd cmd\claudecompanion
+"%USERPROFILE%\go\bin\rsrc.exe" -ico "..\..\icon.ico" -o rsrc_windows_amd64.syso 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    echo WARNING: rsrc not found or failed, icon may not be embedded in exe
+)
+cd ..\..
+
 REM Build for Windows
 echo Compiling for Windows (amd64)...
 set GOOS=windows
@@ -28,17 +41,25 @@ set CGO_ENABLED=0
 go build -ldflags="-s -w -H windowsgui" -o %OUTPUT_DIR%\%APP_NAME% %MAIN_PACKAGE%
 
 if %ERRORLEVEL% EQU 0 (
+    REM Copy required files
+    echo Copying required files...
+    copy icon.ico %OUTPUT_DIR%\ >nul 2>nul
+    if not exist %OUTPUT_DIR%\config.yaml (
+        copy config.yaml.example %OUTPUT_DIR%\config.yaml >nul 2>nul
+    )
+
     echo.
     echo ========================================
     echo Build successful!
-    echo Output: %OUTPUT_DIR%\%APP_NAME%
     echo ========================================
+    echo.
+    echo Output files:
+    echo   %OUTPUT_DIR%\%APP_NAME% (with embedded icon)
+    echo   %OUTPUT_DIR%\icon.ico (for notifications)
+    echo   %OUTPUT_DIR%\config.yaml (configuration)
     echo.
     echo To run the application:
     echo   %OUTPUT_DIR%\%APP_NAME%
-    echo.
-    echo Config file will be created at:
-    echo   %%APPDATA%%\ClaudeCompanion\config.yaml
 ) else (
     echo.
     echo ========================================
