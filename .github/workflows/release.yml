@@ -30,6 +30,9 @@ jobs:
       # Linux amd64
       - name: Build Linux amd64
         run: |
+          # Copy icon for go:embed
+          cp icon.ico cmd/claudecompanion/icon.ico
+
           CGO_ENABLED=1 go build -ldflags "-s -w" -o dist/linux-amd64/claudecompanion ./cmd/claudecompanion
           cp config.yaml.example dist/linux-amd64/config.yaml
           cp README.md dist/linux-amd64/
@@ -134,6 +137,9 @@ jobs:
       # macOS Universal Binary (Intel + Apple Silicon)
       - name: Build macOS Universal Binary
         run: |
+          # Copy icon for go:embed
+          cp icon.ico cmd/claudecompanion/icon.ico
+
           # Build for both architectures
           CGO_ENABLED=1 GOARCH=amd64 go build -ldflags "-s -w" -o dist/darwin-amd64/claudecompanion ./cmd/claudecompanion
           CGO_ENABLED=1 GOARCH=arm64 go build -ldflags "-s -w" -o dist/darwin-arm64/claudecompanion ./cmd/claudecompanion
