@@ -1,6 +1,6 @@
 module claudecompanion
 
-go 1.21
+go 1.21.5
 
 require (
 	github.com/getlantern/systray v1.2.2
@@ -19,5 +19,6 @@ require (
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d // indirect
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c // indirect
-	golang.org/x/sys v0.6.0 // indirect
+	github.com/stretchr/testify v1.8.4 // indirect
+	golang.org/x/sys v0.30.0 // indirect
 )

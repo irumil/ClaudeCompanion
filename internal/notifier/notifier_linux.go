@@ -1,15 +1,14 @@
-//go:build windows
-// +build windows
+//go:build linux
+// +build linux
 
 package notifier
 
 import (
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"sync"
-
-	"github.com/go-toast/toast"
 )
 
 // NotificationState tracks which notifications have been shown
@@ -22,54 +21,68 @@ type NotificationState struct {
 
 // Notifier handles system notifications
 type Notifier struct {
-	state        *NotificationState
-	embeddedIcon []byte
+	state *NotificationState
 }
 
 // NewNotifier creates a new notifier
-func NewNotifier(embeddedIcon []byte) *Notifier {
+func NewNotifier() *Notifier {
 	return &Notifier{
-		state:        &NotificationState{},
-		embeddedIcon: embeddedIcon,
+		state: &NotificationState{},
 	}
 }
 
-// getIconPath returns the path to the application icon
-// Extracts embedded icon to temp file if needed
-func (n *Notifier) getIconPath() string {
-	// Try external icon.ico first (for backwards compatibility)
+// getIconPath returns the path to the app icon for notifications
+func getIconPath() string {
+	// Get executable directory
 	exePath, err := os.Executable()
-	if err == nil {
-		exeDir := filepath.Dir(exePath)
-		iconPath := filepath.Join(exeDir, "icon.ico")
-		if _, err := os.Stat(iconPath); err == nil {
-			return iconPath
+	if err != nil {
+		return ""
+	}
+	exeDir := filepath.Dir(exePath)
+
+	// Try app-icon.png in the same directory
+	iconPath := filepath.Join(exeDir, "app-icon.png")
+	if _, err := os.Stat(iconPath); err == nil {
+		return iconPath
+	}
+
+	// Try icon96.png from extension folder (when running from source)
+	iconPath = filepath.Join(exeDir, "..", "extension", "icon96.png")
+	if _, err := os.Stat(iconPath); err == nil {
+		absPath, _ := filepath.Abs(iconPath)
+		return absPath
+	}
+
+	return ""
+}
+
+// showNotification displays a native Linux notification using notify-send
+func showNotification(title, message string) error {
+	args := []string{
+		"--app-name=ClaudeCompanion",
+		title,
+		message,
+	}
+
+	// Add icon if available
+	iconPath := getIconPath()
+	if iconPath != "" {
+		args = append([]string{"--icon=" + iconPath}, args...)
+		log.Printf("[DEBUG] Using icon: %s", iconPath)
+	} else {
+		log.Printf("[WARNING] No icon found")
+	}
+
+	cmd := exec.Command("notify-send", args...)
+
+	// Run asynchronously so it doesn't block
+	go func() {
+		if err := cmd.Run(); err != nil {
+			log.Printf("notify-send failed: %v", err)
 		}
-	}
+	}()
 
-	// If no embedded icon provided, return empty
-	if len(n.embeddedIcon) == 0 {
-		log.Println("No embedded icon available")
-		return ""
-	}
-
-	// Extract embedded icon to temp file
-	tempDir := os.TempDir()
-	tempIconPath := filepath.Join(tempDir, "claudecompanion-icon.ico")
-
-	// Check if temp icon already exists
-	if _, err := os.Stat(tempIconPath); err == nil {
-		return tempIconPath
-	}
-
-	// Write embedded icon to temp file
-	if err := os.WriteFile(tempIconPath, n.embeddedIcon, 0644); err != nil {
-		log.Printf("Failed to write embedded icon to temp file: %v", err)
-		return ""
-	}
-
-	log.Printf("Extracted embedded icon to: %s", tempIconPath)
-	return tempIconPath
+	return nil
 }
 
 // NotifyError shows an error notification (for authorization issues)
@@ -79,16 +92,10 @@ func (n *Notifier) NotifyError(errorCount int, threshold int) {
 
 	if errorCount >= threshold && !n.state.lastErrorNotification {
 		title := "Проблема с авторизацией"
-		message := "Сайт не принимает запросы. Возможно, сессия устарела. Пожалуйста, зайдите на сайт и обновите авторизацию. 🔐"
+		message := "Сайт не принимает запросы. Возможно, сессия устарела."
 
 		log.Printf("Attempting to show error notification")
-		notification := toast.Notification{
-			AppID:   "ClaudeCompanion",
-			Title:   title,
-			Message: message,
-			Icon:    n.getIconPath(),
-		}
-		if err := notification.Push(); err != nil {
+		if err := showNotification(title, message); err != nil {
 			log.Printf("Failed to show notification: %v", err)
 		} else {
 			log.Println("Error notification shown successfully")
@@ -108,13 +115,7 @@ func (n *Notifier) NotifyLowValue(value int, phrase string) {
 		message := phrase
 
 		log.Printf("Attempting to show low value notification: %s", phrase)
-		notification := toast.Notification{
-			AppID:   "ClaudeCompanion",
-			Title:   title,
-			Message: message,
-			Icon:    n.getIconPath(),
-		}
-		if err := notification.Push(); err != nil {
+		if err := showNotification(title, message); err != nil {
 			log.Printf("Failed to show notification: %v", err)
 		} else {
 			log.Printf("Low value notification shown successfully: %s", phrase)
@@ -132,16 +133,10 @@ func (n *Notifier) NotifyZero(phrase string, resetTime string) {
 
 	if !n.state.lastZeroNotif {
 		title := "Квота исчерпана"
-		message := phrase + "\nВозвращайся в " + resetTime
+		message := phrase + " Возвращайся в " + resetTime
 
 		log.Printf("Attempting to show zero notification: %s", message)
-		notification := toast.Notification{
-			AppID:   "ClaudeCompanion",
-			Title:   title,
-			Message: message,
-			Icon:    n.getIconPath(),
-		}
-		if err := notification.Push(); err != nil {
+		if err := showNotification(title, message); err != nil {
 			log.Printf("Failed to show notification: %v", err)
 		} else {
 			log.Printf("Zero notification shown successfully: %s", message)
@@ -185,17 +180,11 @@ func (n *Notifier) ResetAll() {
 
 // NotifyGreeting shows a notification when greeting is sent
 func (n *Notifier) NotifyGreeting() {
-	title := "Утренний привет Клоду ☀️"
-	//message := "Сообщение отправлено успешно! ☀️"
+	title := "Утренний привет Клоду"
+	message := "Сообщение отправлено успешно!"
 
 	log.Printf("Attempting to show greeting notification")
-	notification := toast.Notification{
-		AppID: "ClaudeCompanion",
-		Title: title,
-		//Message: message,
-		Icon: n.getIconPath(),
-	}
-	if err := notification.Push(); err != nil {
+	if err := showNotification(title, message); err != nil {
 		log.Printf("Failed to show greeting notification: %v", err)
 	} else {
 		log.Println("Greeting notification shown successfully")

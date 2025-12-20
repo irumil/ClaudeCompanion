@@ -29,12 +29,14 @@ type Client struct {
 	organizationID string
 	headers        map[string]string // Includes User-Agent
 	proxy          string
+	curlPath       string
 }
 
 // NewClient creates a new API client
-func NewClient(proxy string) *Client {
+func NewClient(proxy, curlPath string) *Client {
 	return &Client{
-		proxy: proxy,
+		proxy:    proxy,
+		curlPath: curlPath,
 	}
 }
 
@@ -137,11 +139,21 @@ func (c *Client) fetchWithCurl() (*UsageResponse, error) {
 
 // getCurlPath returns the platform-specific curl path
 func (c *Client) getCurlPath() string {
+	// Use custom curl path if configured
+	if c.curlPath != "" {
+		return c.curlPath
+	}
+
+	// Otherwise use platform defaults
 	switch runtime.GOOS {
 	case "windows":
 		return "curl.exe"
+	case "darwin":
+		// macOS: use Homebrew curl to avoid Cloudflare issues
+		return "/opt/homebrew/opt/curl/bin/curl"
 	default:
-		return "/usr/bin/curl"
+		// Linux and others: use system curl
+		return "curl"
 	}
 }
 

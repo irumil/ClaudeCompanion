@@ -18,6 +18,7 @@ System tray application for monitoring Claude.ai API usage quota in real-time.
 - ⚙️ **Hot-reload config** - No restart needed for configuration changes
 - 🔒 **Proxy support** - Works with corporate proxies
 - 📊 **Detailed tooltips** - Shows 5-hour and 7-day quota information
+- 🍎 **Cross-platform** - Supports Windows, macOS (Intel & Apple Silicon), and Linux
 
 ## Color Coding
 
@@ -239,10 +240,105 @@ See [schema/architecture.md](schema/architecture.md) for detailed architecture d
 ### Prerequisites
 
 - Go 1.21 or higher
-- Windows (for system tray and notifications)
+- Windows (for Windows build), macOS (for macOS build), or Linux (for Linux build)
 - Git (optional, for cloning the repository)
+- **macOS only**: Homebrew curl (required, see installation instructions below)
+- **Linux only**: System libraries (libayatana-appindicator3-dev, libgtk-3-dev, curl, libnotify-bin)
 
-### Full Build (Application + Extension)
+### Building for macOS
+
+The application supports macOS (Intel and Apple Silicon) with native notifications and system tray integration.
+
+```bash
+# 1. Clone repository (or download ZIP)
+git clone https://github.com/irumil/ClaudeCompanion.git
+cd ClaudeCompanion
+
+# 2. Run build script
+cd build
+./build-macos.sh
+```
+
+The script will:
+- Download dependencies
+- Build for Intel (amd64)
+- Build for Apple Silicon (arm64)
+- Create universal binary that works on both architectures
+
+**Output files:**
+- `dist/claudecompanion` - Universal binary
+
+**Running the app:**
+```bash
+# From project root
+./dist/claudecompanion
+
+# Config will be created at:
+# ~/Library/Application Support/ClaudeCompanion/config.yaml
+```
+
+**Notes for macOS:**
+- Browser extension works in Firefox (same setup as Windows)
+- Notifications use native macOS notification center
+- System tray icon appears in menu bar
+- CGO is required (enabled automatically by build script)
+- **Requires Homebrew curl** - System curl may be blocked by Cloudflare. Install with:
+  ```bash
+  brew install curl
+  ```
+  The app uses `/opt/homebrew/opt/curl/bin/curl` by default. To use a different curl binary, set `curl_path` in `config.yaml`:
+  ```yaml
+  curl_path: "/path/to/your/curl"
+  ```
+
+### Building for Linux
+
+The application supports Linux with native notifications and system tray integration.
+
+**Prerequisites:**
+```bash
+# Install required system libraries
+# For Ubuntu/Debian:
+sudo apt-get install -y libayatana-appindicator3-dev libgtk-3-dev curl libnotify-bin
+
+# For Fedora/RHEL:
+sudo dnf install -y libappindicator-gtk3-devel gtk3-devel curl libnotify
+
+# For Arch Linux:
+sudo pacman -S libappindicator-gtk3 gtk3 curl libnotify
+```
+
+**Building:**
+```bash
+# 1. Clone repository (or download ZIP)
+git clone https://github.com/irumil/ClaudeCompanion.git
+cd ClaudeCompanion
+
+# 2. Install Go dependencies
+go mod download
+
+# 3. Build for Linux
+CGO_ENABLED=1 go build -ldflags "-s -w" -o dist/claudecompanion ./cmd/claudecompanion
+
+# 4. Copy config
+cp config.yaml.example dist/config.yaml
+
+# 5. Run the app
+./dist/claudecompanion
+
+# Config will be created at:
+# ~/.config/claudecompanion/config.yaml
+```
+
+**Notes for Linux:**
+- Browser extension works in Firefox (same setup as Windows)
+- Notifications use `notify-send` (libnotify)
+- System tray icon requires AppIndicator library
+- CGO is required (set `CGO_ENABLED=1`)
+- Uses system `curl` by default (`/usr/bin/curl`)
+- Desktop environment with system tray support required (GNOME, KDE, XFCE, etc.)
+
+### Full Build (Application + Extension) for Windows
 
 #### Option 1: Automated Build (Recommended)
 
@@ -406,14 +502,18 @@ ClaudeCompanion/
 ## Dependencies
 
 ### Go Libraries
-- [github.com/getlantern/systray](https://github.com/getlantern/systray) - System tray
-- [github.com/go-toast/toast](https://github.com/go-toast/toast) - Toast notifications
+- [github.com/getlantern/systray](https://github.com/getlantern/systray) - System tray (cross-platform)
+- [github.com/go-toast/toast](https://github.com/go-toast/toast) - Toast notifications (Windows)
+- [github.com/gen2brain/beeep](https://github.com/gen2brain/beeep) - Notifications (macOS/Linux)
 - [github.com/robfig/cron/v3](https://github.com/robfig/cron) - Cron scheduler for scheduled tasks
 - [gopkg.in/yaml.v3](https://gopkg.in/yaml.v3) - YAML parsing
 
 ### External Tools
-- **curl.exe** - For API requests (included in Windows 10+)
-- **notepad.exe** - For opening config file
+- **Windows**: curl.exe - For API requests (included in Windows 10+)
+- **macOS**: Homebrew curl - For API requests (install with `brew install curl`)
+- **Linux**: curl - For API requests (install with package manager)
+- **Linux**: notify-send - For notifications (install `libnotify-bin` or `libnotify`)
+- **Windows**: notepad.exe - For opening config file
 
 ## License
 

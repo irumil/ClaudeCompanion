@@ -21,6 +21,7 @@ type Config struct {
 	Proxy                 string                `yaml:"proxy"`
 	EnableFileLogging     bool                  `yaml:"enable_file_logging"`
 	BrowserPath           string                `yaml:"browser_path"`
+	CurlPath              string                `yaml:"curl_path"` // Custom path to curl binary
 	LowValueNotifications LowValueNotifications `yaml:"low_value_notifications"`
 	DemoMode              DemoMode              `yaml:"demo_mode"`
 	Greeting              Greeting              `yaml:"greeting"`

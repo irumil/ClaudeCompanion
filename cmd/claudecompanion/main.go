@@ -94,8 +94,8 @@ func main() {
 	// Initialize components
 	logger.Info("Initializing components...")
 
-	logger.Info("  - API client (proxy: %s)...", cfg.Proxy)
-	app.apiClient = api.NewClient(cfg.Proxy)
+	logger.Info("  - API client (proxy: %s, curl: %s)...", cfg.Proxy, cfg.CurlPath)
+	app.apiClient = api.NewClient(cfg.Proxy, cfg.CurlPath)
 	logger.Info("  - API client initialized")
 
 	logger.Info("  - HTTP server on port %d...", cfg.ServerPort)
@@ -162,7 +162,7 @@ func main() {
 		logger.Info("    Browser path updated: %s", newCfg.BrowserPath)
 
 		logger.Info("    Reloading API client with new settings...")
-		app.apiClient = api.NewClient(newCfg.Proxy)
+		app.apiClient = api.NewClient(newCfg.Proxy, newCfg.CurlPath)
 		logger.Info("    API client reloaded successfully")
 	})
 

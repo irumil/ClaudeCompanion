@@ -8,6 +8,7 @@ notification_threshold: 10    # N errors before showing notification
 proxy: ""                     # Leave empty for no proxy, or set "http://your-proxy:port"
 enable_file_logging: false    # true = log to file and console, false = console only
 browser_path: ""              # Leave empty for default browser, or set path like "C:\\Program Files\\Mozilla Firefox\\firefox.exe"
+curl_path: ""                 # Leave empty for default (curl.exe on Windows, /opt/homebrew/opt/curl/bin/curl on macOS), or set custom path
 
 low_value_notifications:
   enabled: true

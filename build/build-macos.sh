@@ -22,7 +22,7 @@ go mod download
 
 # Build for macOS (Intel)
 echo "Compiling for macOS (amd64)..."
-GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-s -w" -o "$OUTPUT_DIR/${APP_NAME}-amd64" "$MAIN_PACKAGE"
+GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -ldflags="-s -w" -o "$OUTPUT_DIR/${APP_NAME}-amd64" "$MAIN_PACKAGE"
 
 if [ $? -eq 0 ]; then
     echo ""
@@ -35,7 +35,7 @@ fi
 # Build for macOS (Apple Silicon)
 echo ""
 echo "Compiling for macOS (arm64)..."
-GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -ldflags="-s -w" -o "$OUTPUT_DIR/${APP_NAME}-arm64" "$MAIN_PACKAGE"
+GOOS=darwin GOARCH=arm64 CGO_ENABLED=1 go build -ldflags="-s -w" -o "$OUTPUT_DIR/${APP_NAME}-arm64" "$MAIN_PACKAGE"
 
 if [ $? -eq 0 ]; then
     echo ""
@@ -66,6 +66,13 @@ if [ -f "$OUTPUT_DIR/${APP_NAME}-amd64" ] && [ -f "$OUTPUT_DIR/${APP_NAME}-arm64
 
         # Clean up architecture-specific binaries
         rm "$OUTPUT_DIR/${APP_NAME}-amd64" "$OUTPUT_DIR/${APP_NAME}-arm64"
+
+        # Copy icon for notifications
+        if [ -f "extension/icon96.png" ]; then
+            cp extension/icon96.png "$OUTPUT_DIR/app-icon.png"
+            echo ""
+            echo "App icon copied to $OUTPUT_DIR/app-icon.png"
+        fi
     fi
 fi
 

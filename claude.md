@@ -4,22 +4,24 @@
 
 ## Project Overview
 
-**ClaudeCompanion** is a Windows system tray application that monitors Claude.ai API usage quota in real-time.
+**ClaudeCompanion** is a cross-platform system tray application that monitors Claude.ai API usage quota in real-time.
 
 ### Key Components
 
 1. **Desktop Application (Go)** - System tray app that polls Claude.ai API
 2. **Browser Extension (Firefox)** - Captures authentication and sends to desktop app
 3. **Dynamic Icon Generation** - Creates tray icons with colored percentage numbers
-4. **Toast Notifications** - Native Windows notifications for low/zero quota
+4. **Native Notifications** - Platform-specific notifications for low/zero quota (Windows Toast / macOS Notification Center)
 
 ### Tech Stack
 
 - **Language**: Go 1.21+
-- **Platform**: Windows (primary), cross-platform capable
+- **Platform**: Windows, macOS (Intel & Apple Silicon), and Linux
 - **Key Libraries**:
-  - `github.com/getlantern/systray` - System tray integration
+  - `github.com/getlantern/systray` - System tray integration (cross-platform)
   - `github.com/go-toast/toast` - Windows Toast notifications
+  - Native macOS notifications via `terminal-notifier`
+  - Linux notifications via `notify-send` (libnotify)
   - `gopkg.in/yaml.v3` - Configuration management
   - Standard library for image generation and HTTP
 
@@ -43,7 +45,9 @@ ClaudeCompanion/
 │   ├── logger/
 │   │   └── logger.go          # File/console logging with daily rotation
 │   ├── notifier/
-│   │   └── notifier.go        # Toast notifications with state tracking
+│   │   ├── notifier.go        # Toast notifications (Windows)
+│   │   ├── notifier_darwin.go # Native notifications (macOS)
+│   │   └── notifier_linux.go  # Native notifications (Linux)
 │   ├── server/
 │   │   └── server.go          # HTTP server (:8383) for extension
 │   └── tray/
@@ -136,6 +140,47 @@ if usage.FiveHour.ResetsAt != nil {
 }
 ```
 
+### Platform-Specific Code with Build Tags
+
+**Files**: `internal/notifier/notifier.go` (Windows), `internal/notifier/notifier_darwin.go` (macOS), `internal/notifier/notifier_linux.go` (Linux)
+
+The notifier package uses build tags to provide platform-specific implementations:
+
+**Windows** (`notifier.go`):
+```go
+//go:build windows
+// +build windows
+
+package notifier
+
+import "github.com/go-toast/toast"
+// ... Windows Toast notification implementation
+```
+
+**macOS** (`notifier_darwin.go`):
+```go
+//go:build darwin
+// +build darwin
+
+package notifier
+
+import "os/exec"
+// ... macOS native notification via terminal-notifier
+```
+
+**Linux** (`notifier_linux.go`):
+```go
+//go:build linux
+// +build linux
+
+package notifier
+
+import "os/exec"
+// ... Linux native notification via notify-send
+```
+
+All implementations provide the same interface, allowing the rest of the codebase to remain platform-agnostic.
+
 ### Windows Console Window Hiding
 
 **Files**: `internal/api/client_windows.go`, build with `-ldflags "-H windowsgui"`
@@ -176,12 +221,38 @@ rsrc -ico "../../icon.ico" -o rsrc_windows_amd64.syso
 
 ### Building the Application
 
+**Windows:**
 ```bash
 # Debug build (with console)
 go build -o dist/claudecompanion.exe ./cmd/claudecompanion
 
 # Release build (no console)
 go build -ldflags "-H windowsgui" -o dist/claudecompanion.exe ./cmd/claudecompanion
+```
+
+**macOS:**
+```bash
+# Automated build (creates universal binary for Intel + Apple Silicon)
+cd build
+./build-macos.sh
+
+# Or manual build (native architecture only)
+go build -o dist/claudecompanion ./cmd/claudecompanion
+
+# Config location on macOS:
+# ~/Library/Application Support/ClaudeCompanion/config.yaml
+```
+
+**Linux:**
+```bash
+# Build (requires system libraries installed)
+CGO_ENABLED=1 go build -ldflags "-s -w" -o dist/claudecompanion ./cmd/claudecompanion
+
+# Required system libraries (Ubuntu/Debian):
+sudo apt-get install -y libayatana-appindicator3-dev libgtk-3-dev curl libnotify-bin
+
+# Config location on Linux:
+# ~/.config/claudecompanion/config.yaml
 ```
 
 ### Packaging the Extension
@@ -232,10 +303,10 @@ demo_mode:
 1. **Firefox Only**: Extension uses `browser.*` API (Firefox-specific)
    - Chrome requires `chrome.*` and manifest v3
 
-2. **Windows Primary**: While Go code is cross-platform, some features are Windows-specific:
-   - Toast notifications (go-toast)
-   - Systray icon embedding
-   - Curl window hiding
+2. **Platform-Specific Features**: Different notification systems and build requirements:
+   - **Windows**: Toast notifications (go-toast), systray icon embedding, curl window hiding
+   - **macOS**: Native notification center (terminal-notifier), requires CGO for systray, universal binary support
+   - **Linux**: Native notifications (notify-send), requires CGO and system libraries (libayatana-appindicator3-dev, libgtk-3-dev)
 
 3. **Systray Library Limitation**: `getlantern/systray` doesn't support click events on icon
    - Workaround: Added "Открыть Claude.ai" menu item
@@ -295,9 +366,21 @@ demo_mode:
 
 ## Testing Checklist
 
+**Windows:**
 - [ ] Build without console window (`-H windowsgui`)
 - [ ] Curl doesn't show console
-- [ ] Icon updates every 30 seconds
+
+**macOS:**
+- [ ] Universal binary works on Intel and Apple Silicon
+- [ ] Notifications appear in notification center
+
+**Linux:**
+- [ ] Build with CGO enabled
+- [ ] System tray icon appears
+- [ ] Notifications work with notify-send
+
+**All platforms:**
+- [ ] Icon updates every 60 seconds (or configured interval)
 - [ ] Tooltip shows correct data
 - [ ] Notifications appear for low/zero quota
 - [ ] Settings menu opens config.yaml
@@ -306,6 +389,7 @@ demo_mode:
 - [ ] Extension sends cookies on claude.ai visit
 - [ ] Gray icon appears after 5 API errors
 - [ ] Handles `resets_at: null` correctly (shows `—`)
+- [ ] Work hours feature works correctly (if enabled)
 
 ## Git Workflow
 
