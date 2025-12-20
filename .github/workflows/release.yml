@@ -208,7 +208,9 @@ jobs:
       - name: Generate checksums
         run: |
           cd dist
-          sha256sum claudecompanion-${{ steps.get_version.outputs.VERSION }}-*.{zip,tar.gz,xpi} > checksums.txt
+          sha256sum claudecompanion-${{ steps.get_version.outputs.VERSION }}-*.zip \
+                    claudecompanion-${{ steps.get_version.outputs.VERSION }}-*.tar.gz \
+                    claudecompanion-extension-${{ steps.get_version.outputs.VERSION }}.xpi > checksums.txt
           cat checksums.txt
           cd ..
 
