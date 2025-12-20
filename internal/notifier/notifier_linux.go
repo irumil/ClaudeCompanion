@@ -25,7 +25,8 @@ type Notifier struct {
 }
 
 // NewNotifier creates a new notifier
-func NewNotifier() *Notifier {
+// embeddedIcon parameter is accepted for API consistency but not used on Linux
+func NewNotifier(embeddedIcon []byte) *Notifier {
 	return &Notifier{
 		state: &NotificationState{},
 	}
