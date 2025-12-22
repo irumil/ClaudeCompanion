@@ -106,6 +106,14 @@ enable_file_logging: false  # true = log to file, false = console only
 
 ### 3. Install Browser Extension
 
+**Option 1: Install from Firefox Add-ons (Recommended)**
+
+1. Open Firefox
+2. Visit the [ClaudeCompanion Monitor](https://addons.mozilla.org/firefox/addon/claudecompanion-monitor/) page
+3. Click "Add to Firefox"
+
+**Option 2: Manual Installation (Development)**
+
 1. Open Firefox
 2. Go to `about:debugging#/runtime/this-firefox`
 3. Click "Load Temporary Add-on"

@@ -106,6 +106,14 @@ enable_file_logging: false  # true = файлга логлау, false = конс
 
 ### 3. Браузер киңәйтмәсен урнаштыру
 
+**Вариант 1: Firefox кибетеннән урнаштыру (тәкъдим ителә)**
+
+1. Firefox ачыгыз
+2. [ClaudeCompanion Monitor](https://addons.mozilla.org/firefox/addon/claudecompanion-monitor/) битенә күчегез
+3. "Add to Firefox" басыгыз
+
+**Вариант 2: Кул белән урнаштыру (эшләп чыгару өчен)**
+
 1. Firefox ачыгыз
 2. `about:debugging#/runtime/this-firefox` битенә күчегез
 3. "Загрузить временное дополнение" басыгыз

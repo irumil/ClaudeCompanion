@@ -106,6 +106,14 @@ enable_file_logging: false  # true = логирование в файл, false =
 
 ### 3. Установка расширения для браузера
 
+**Вариант 1: Установка из магазина Firefox (рекомендуется)**
+
+1. Откройте Firefox
+2. Перейдите на страницу [ClaudeCompanion Monitor](https://addons.mozilla.org/firefox/addon/claudecompanion-monitor/)
+3. Нажмите "Добавить в Firefox"
+
+**Вариант 2: Ручная установка (для разработки)**
+
 1. Откройте Firefox
 2. Перейдите на `about:debugging#/runtime/this-firefox`
 3. Нажмите "Загрузить временное дополнение"
