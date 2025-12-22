@@ -42,3 +42,21 @@ work_hours:
   enabled: true               # Enable to limit polling to work hours only
   start: "08:00"              # Start time (HH:MM format)
   end: "20:00"                # End time (HH:MM format)
+
+icon_colors:
+  green:                      # Color for quota >40%
+    r: 0
+    g: 180
+    b: 0
+  yellow:                     # Color for quota 20-40%
+    r: 255
+    g: 165
+    b: 0
+  red:                        # Color for quota <20%
+    r: 200
+    g: 0
+    b: 0
+  gray:                       # Color for error state
+    r: 128
+    g: 128
+    b: 128

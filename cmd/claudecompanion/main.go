@@ -103,7 +103,7 @@ func main() {
 	logger.Info("  - HTTP server initialized")
 
 	logger.Info("  - System tray manager...")
-	app.trayMgr = tray.NewTrayManager(cfgMgr.GetPath())
+	app.trayMgr = tray.NewTrayManager(cfgMgr.GetPath(), &cfg.IconColors)
 	app.trayMgr.SetBrowserPath(cfg.BrowserPath)
 	logger.Info("  - Tray manager initialized")
 

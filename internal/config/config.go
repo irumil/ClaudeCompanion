@@ -26,6 +26,7 @@ type Config struct {
 	DemoMode              DemoMode              `yaml:"demo_mode"`
 	Greeting              Greeting              `yaml:"greeting"`
 	WorkHours             WorkHours             `yaml:"work_hours"`
+	IconColors            IconColors            `yaml:"icon_colors"`
 }
 
 type LowValueNotifications struct {
@@ -50,6 +51,19 @@ type WorkHours struct {
 	Enabled bool   `yaml:"enabled"`
 	Start   string `yaml:"start"` // Format: "08:00"
 	End     string `yaml:"end"`   // Format: "20:00"
+}
+
+type IconColors struct {
+	Green  ColorRGB `yaml:"green"`  // Color for >40% quota
+	Yellow ColorRGB `yaml:"yellow"` // Color for 20-40% quota
+	Red    ColorRGB `yaml:"red"`    // Color for <20% quota
+	Gray   ColorRGB `yaml:"gray"`   // Color for error state
+}
+
+type ColorRGB struct {
+	R uint8 `yaml:"r"`
+	G uint8 `yaml:"g"`
+	B uint8 `yaml:"b"`
 }
 
 // Manager handles configuration loading and hot-reloading
@@ -135,6 +149,19 @@ func (m *Manager) reload() error {
 	if config.NotificationThreshold == 0 {
 		config.NotificationThreshold = 10
 	}
+	// Apply default icon colors if not set
+	if config.IconColors.Green.R == 0 && config.IconColors.Green.G == 0 && config.IconColors.Green.B == 0 {
+		config.IconColors.Green = ColorRGB{R: 0, G: 180, B: 0}
+	}
+	if config.IconColors.Yellow.R == 0 && config.IconColors.Yellow.G == 0 && config.IconColors.Yellow.B == 0 {
+		config.IconColors.Yellow = ColorRGB{R: 255, G: 165, B: 0}
+	}
+	if config.IconColors.Red.R == 0 && config.IconColors.Red.G == 0 && config.IconColors.Red.B == 0 {
+		config.IconColors.Red = ColorRGB{R: 200, G: 0, B: 0}
+	}
+	if config.IconColors.Gray.R == 0 && config.IconColors.Gray.G == 0 && config.IconColors.Gray.B == 0 {
+		config.IconColors.Gray = ColorRGB{R: 128, G: 128, B: 128}
+	}
 
 	m.mu.Lock()
 	m.config = &config
@@ -215,6 +242,12 @@ func (m *Manager) createDefaultConfig() error {
 			Enabled: true,    // Enabled by default
 			Start:   "08:00", // 8 AM
 			End:     "20:00", // 8 PM
+		},
+		IconColors: IconColors{
+			Green:  ColorRGB{R: 0, G: 180, B: 0},     // Green for >40%
+			Yellow: ColorRGB{R: 255, G: 165, B: 0},   // Yellow for 20-40%
+			Red:    ColorRGB{R: 200, G: 0, B: 0},     // Red for <20%
+			Gray:   ColorRGB{R: 128, G: 128, B: 128}, // Gray for errors
 		},
 	}
 

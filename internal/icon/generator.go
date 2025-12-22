@@ -7,6 +7,8 @@ import (
 	"image/color"
 	"image/draw"
 	"image/png"
+
+	"claudecompanion/internal/config"
 )
 
 const (
@@ -24,11 +26,15 @@ const (
 )
 
 // Generator creates tray icons
-type Generator struct{}
+type Generator struct {
+	colors *config.IconColors
+}
 
 // NewGenerator creates a new icon generator
-func NewGenerator() *Generator {
-	return &Generator{}
+func NewGenerator(colors *config.IconColors) *Generator {
+	return &Generator{
+		colors: colors,
+	}
 }
 
 // Generate creates a simple colored icon with text in ICO format
@@ -97,13 +103,13 @@ func (g *Generator) convertToICO(img *image.RGBA) ([]byte, error) {
 func (g *Generator) getColor(mode ColorMode) color.Color {
 	switch mode {
 	case ColorGreen:
-		return color.RGBA{0, 180, 0, 255}
+		return color.RGBA{g.colors.Green.R, g.colors.Green.G, g.colors.Green.B, 255}
 	case ColorYellow:
-		return color.RGBA{255, 200, 0, 255}
+		return color.RGBA{g.colors.Yellow.R, g.colors.Yellow.G, g.colors.Yellow.B, 255}
 	case ColorRed:
-		return color.RGBA{220, 0, 0, 255}
+		return color.RGBA{g.colors.Red.R, g.colors.Red.G, g.colors.Red.B, 255}
 	default:
-		return color.RGBA{128, 128, 128, 255}
+		return color.RGBA{g.colors.Gray.R, g.colors.Gray.G, g.colors.Gray.B, 255}
 	}
 }
 

@@ -214,6 +214,35 @@ work_hours:
 - `start: "09:00"`, `end: "17:00"` - standard office hours (9 AM to 5 PM)
 - `start: "20:00"`, `end: "08:00"` - overnight shift
 
+### Icon Colors
+
+Customize the tray icon colors for different quota levels:
+
+```yaml
+icon_colors:
+  green:      # Color for quota >40%
+    r: 0
+    g: 180
+    b: 0
+  yellow:     # Color for quota 20-40%
+    r: 255
+    g: 165
+    b: 0
+  red:        # Color for quota <20%
+    r: 200
+    g: 0
+    b: 0
+  gray:       # Color for error state
+    r: 128
+    g: 128
+    b: 128
+```
+
+**How it works:**
+- Colors are specified in RGB format (0-255 for each component)
+- Changes apply automatically via hot-reload (within 2 seconds)
+- If not specified in config, default colors are used automatically
+
 ## Architecture
 
 The application consists of two parts:

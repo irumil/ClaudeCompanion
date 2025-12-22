@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"runtime"
 
+	"claudecompanion/internal/config"
 	"claudecompanion/internal/icon"
 
 	"github.com/getlantern/systray"
@@ -28,9 +29,9 @@ type TrayManager struct {
 }
 
 // NewTrayManager creates a new tray manager
-func NewTrayManager(configPath string) *TrayManager {
+func NewTrayManager(configPath string, iconColors *config.IconColors) *TrayManager {
 	return &TrayManager{
-		iconGen:      icon.NewGenerator(),
+		iconGen:      icon.NewGenerator(iconColors),
 		currentValue: -1,
 		currentMode:  icon.ColorGray,
 		tooltip:      "Ожидаю куки от расширения",
