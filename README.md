@@ -130,6 +130,7 @@ Double-click `claudecompanion.exe` - it will start in system tray (no console wi
 3. **Check the tray icon** - Shows remaining quota percentage
 4. **Right-click the icon** for menu:
    - "Открыть Claude.ai" - Open Claude.ai in browser
+   - "Получить статистику" - Refresh quota statistics immediately (bypasses polling interval)
    - "Открыть настройки" - Edit configuration
    - "Выход" - Exit application
 
