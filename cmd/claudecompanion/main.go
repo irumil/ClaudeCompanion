@@ -94,8 +94,8 @@ func main() {
 	// Initialize components
 	logger.Info("Initializing components...")
 
-	logger.Info("  - API client (proxy: %s, curl: %s)...", cfg.Proxy, cfg.CurlPath)
-	app.apiClient = api.NewClient(cfg.Proxy, cfg.CurlPath)
+	logger.Info("  - API client (proxy: %s, curl: %s, full logging: %v)...", cfg.Proxy, cfg.CurlPath, cfg.EnableFileFullLogging)
+	app.apiClient = api.NewClient(cfg.Proxy, cfg.CurlPath, cfg.EnableFileFullLogging)
 	logger.Info("  - API client initialized")
 
 	logger.Info("  - HTTP server on port %d...", cfg.ServerPort)
@@ -163,7 +163,7 @@ func main() {
 
 		// Update API client settings (preserves cookies and context)
 		logger.Info("    Updating API client settings (cookies preserved)...")
-		app.apiClient.UpdateSettings(newCfg.Proxy, newCfg.CurlPath)
+		app.apiClient.UpdateSettings(newCfg.Proxy, newCfg.CurlPath, newCfg.EnableFileFullLogging)
 		logger.Info("    API client settings updated successfully")
 	})
 

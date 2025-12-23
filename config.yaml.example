@@ -7,6 +7,7 @@ gray_mode_threshold: 5        # N errors before showing gray icon
 notification_threshold: 10    # N errors before showing notification
 proxy: ""                     # Leave empty for no proxy, or set "http://your-proxy:port"
 enable_file_logging: false    # true = log to file and console, false = console only
+enable_file_full_logging: false  # true = log full cookies and curl commands (security risk!), false = truncated logs
 browser_path: ""              # Leave empty for default browser, or set path like "C:\\Program Files\\Mozilla Firefox\\firefox.exe"
 curl_path: ""                 # Leave empty for default (curl.exe on Windows, /opt/homebrew/opt/curl/bin/curl on macOS), or set custom path
 

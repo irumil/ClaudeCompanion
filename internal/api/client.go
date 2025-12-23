@@ -10,6 +10,38 @@ import (
 	"time"
 )
 
+// truncateCookie returns a truncated version of cookie string for logging
+// Shows first 60 and last 40 characters to help identify cookie content
+func truncateCookie(cookie string) string {
+	if len(cookie) <= 120 {
+		return cookie
+	}
+	return cookie[:60] + "..." + cookie[len(cookie)-40:]
+}
+
+// truncateArgs returns a truncated version of curl arguments for logging
+// Replaces cookie values with [TRUNCATED] to avoid exposing sensitive data
+func truncateArgs(args []string) []string {
+	truncated := make([]string, len(args))
+	for i, arg := range args {
+		// Truncate cookie header values
+		if i > 0 && args[i-1] == "-H" && len(arg) > 20 && (len(arg) > 100 || (i > 1 && len(args[i-1]) > 0)) {
+			// Check if this looks like a cookie header
+			if len(arg) > 8 && arg[:8] == "Cookie: " {
+				truncated[i] = "Cookie: [TRUNCATED]"
+				continue
+			}
+		}
+		// Keep other arguments as-is
+		if len(arg) > 200 {
+			truncated[i] = arg[:100] + "...[TRUNCATED]..." + arg[len(arg)-50:]
+		} else {
+			truncated[i] = arg
+		}
+	}
+	return truncated
+}
+
 // UsageResponse represents the API response
 type UsageResponse struct {
 	FiveHour struct {
@@ -30,13 +62,15 @@ type Client struct {
 	headers        map[string]string // Includes User-Agent
 	proxy          string
 	curlPath       string
+	fullLogging    bool // Enable full logging of cookies and curl commands
 }
 
 // NewClient creates a new API client
-func NewClient(proxy, curlPath string) *Client {
+func NewClient(proxy, curlPath string, fullLogging bool) *Client {
 	return &Client{
-		proxy:    proxy,
-		curlPath: curlPath,
+		proxy:       proxy,
+		curlPath:    curlPath,
+		fullLogging: fullLogging,
 	}
 }
 
@@ -48,13 +82,21 @@ func (c *Client) SetContext(cookies, targetURL, organizationID string, headers m
 	c.headers = headers
 	log.Printf("Context updated: URL=%s, OrgID=%s, Cookies length=%d, Headers count=%d",
 		targetURL, organizationID, len(cookies), len(headers))
+
+	// Log cookie preview (full or truncated based on settings)
+	if c.fullLogging {
+		log.Printf("  Cookie (full): %s", cookies)
+	} else {
+		log.Printf("  Cookie preview: %s", truncateCookie(cookies))
+	}
 }
 
-// UpdateSettings updates proxy and curl path without clearing context (cookies, headers, etc.)
-func (c *Client) UpdateSettings(proxy, curlPath string) {
+// UpdateSettings updates proxy, curl path and full logging flag without clearing context (cookies, headers, etc.)
+func (c *Client) UpdateSettings(proxy, curlPath string, fullLogging bool) {
 	c.proxy = proxy
 	c.curlPath = curlPath
-	log.Printf("Settings updated: Proxy=%s, CurlPath=%s (context preserved)", proxy, curlPath)
+	c.fullLogging = fullLogging
+	log.Printf("Settings updated: Proxy=%s, CurlPath=%s, FullLogging=%v (context preserved)", proxy, curlPath, fullLogging)
 }
 
 // HasContext returns true if cookies are set
@@ -103,8 +145,15 @@ func (c *Client) fetchWithCurl() (*UsageResponse, error) {
 	log.Printf("  Command: %s", curlPath)
 	log.Printf("  URL: %s", c.targetURL)
 	log.Printf("  Proxy: %s", c.proxy)
-	log.Printf("  Cookie preview: %.100s...", c.cookies)
-	log.Printf("  Full command: %s %v", curlPath, args)
+
+	// Log cookies (full or truncated based on settings)
+	if c.fullLogging {
+		log.Printf("  Cookie (full): %s", c.cookies)
+		log.Printf("  Full command: %s %v", curlPath, args)
+	} else {
+		log.Printf("  Cookie preview: %s", truncateCookie(c.cookies))
+		log.Printf("  Command preview: %s %v", curlPath, truncateArgs(args))
+	}
 	log.Printf("========================================")
 
 	cmd := exec.Command(curlPath, args...)

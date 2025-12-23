@@ -20,6 +20,7 @@ type Config struct {
 	NotificationThreshold int                   `yaml:"notification_threshold"`
 	Proxy                 string                `yaml:"proxy"`
 	EnableFileLogging     bool                  `yaml:"enable_file_logging"`
+	EnableFileFullLogging bool                  `yaml:"enable_file_full_logging"` // Log full cookies and curl commands
 	BrowserPath           string                `yaml:"browser_path"`
 	CurlPath              string                `yaml:"curl_path"` // Custom path to curl binary
 	LowValueNotifications LowValueNotifications `yaml:"low_value_notifications"`
@@ -212,6 +213,7 @@ func (m *Manager) createDefaultConfig() error {
 		NotificationThreshold: 10,
 		Proxy:                 "",
 		EnableFileLogging:     true,
+		EnableFileFullLogging: false, // Don't log full cookies/curl by default for security
 		BrowserPath:           "",
 		LowValueNotifications: LowValueNotifications{
 			Enabled:   true,
