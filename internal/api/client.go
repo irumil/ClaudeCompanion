@@ -253,21 +253,26 @@ func (ur *UsageResponse) FormatTooltip() string {
 	var sevenDayResetTime string
 
 	if ur.FiveHour.ResetsAt != nil {
-		fiveHourResetTime = ur.FiveHour.ResetsAt.Local().Format("15:04:05")
+		fiveHourResetTime = ur.FiveHour.ResetsAt.Local().Format("15:04")
 	} else {
 		fiveHourResetTime = "—"
 	}
 
 	if ur.SevenDay.ResetsAt != nil {
-		sevenDayResetTime = ur.SevenDay.ResetsAt.Local().Format("02.01.2006 15:04:05")
+		sevenDayResetTime = ur.SevenDay.ResetsAt.Local().Format("02.01 15:04")
 	} else {
 		sevenDayResetTime = "—"
 	}
 
+	// Add current timestamp for last update
+	currentTime := time.Now().Format("15:04 02.01")
+
 	// Use \r\n for Windows multiline tooltips
-	return fmt.Sprintf("5 часов: %.0f%%, Сброс: %s\r\nНеделя: %.0f%%, Сброс: %s",
+	// Compact format to fit Windows tooltip limit (~63 chars per line)
+	return fmt.Sprintf("5ч: %.0f%% (%s) | 7д: %.0f%% (%s)\r\nОбновлено: %s",
 		fiveHourUtilization, fiveHourResetTime,
-		sevenDayUtilization, sevenDayResetTime)
+		sevenDayUtilization, sevenDayResetTime,
+		currentTime)
 }
 
 // SendGreeting sends a greeting message to specified chat
