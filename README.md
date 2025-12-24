@@ -146,7 +146,14 @@ poll_interval_seconds: 60      # How often to check quota
 proxy: ""                      # HTTP proxy (leave empty if not needed)
 browser_path: ""               # Custom browser path (leave empty for default)
 enable_file_logging: false     # Enable file logging
+enable_file_full_logging: false # Log full cookies and curl commands (⚠️ security risk!)
 ```
+
+**Logging Options:**
+- `enable_file_logging: false` - Console logging only (default)
+- `enable_file_logging: true` - Log to both file and console
+- `enable_file_full_logging: false` - Truncated logs for security (default)
+- `enable_file_full_logging: true` - Full cookies and curl commands in logs (⚠️ **use only for debugging!**)
 
 ### Notification Settings
 

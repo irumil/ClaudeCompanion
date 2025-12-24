@@ -147,7 +147,14 @@ proxy: ""                      # HTTP прокси (кирәк түгел икә
 browser_path: ""               # Браузерга юл (килешү браузеры өчен буш калдырыгыз)
 curl_path: ""                  # Килешү өчен буш калдырыгыз (Windows'та curl.exe, macOS'та /opt/homebrew/opt/curl/bin/curl), яки үз юлыгызны күрсәтегез
 enable_file_logging: false     # Файлга логлау кабызу
+enable_file_full_logging: false # Cookie һәм curl командаларын тулысынча логлау (⚠️ куркынычсызлык рискы!)
 ```
+
+**Логлау опцияләре:**
+- `enable_file_logging: false` - Консольдә генә логлау (килешү буенча)
+- `enable_file_logging: true` - Файлга һәм консольгә логлау
+- `enable_file_full_logging: false` - Куркынычсызлык өчен кыскартылган логлар (килешү буенча)
+- `enable_file_full_logging: true` - Логларда тулы cookie һәм curl командалары (⚠️ **отладка өчен генә кулланыгыз!**)
 
 ### Белдерү көйләүләре
 
